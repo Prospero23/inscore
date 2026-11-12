@@ -27,5 +27,9 @@
     "@types/node": "^16.11.7",
     "@types/webmidi": "^2.0.6",
     "webmidi": "^2.5.3"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2",
+    "typescript": "^7.0.2"
   }
 }
