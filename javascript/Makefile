@@ -84,6 +84,7 @@ help : node_modules
 # building inscore ts view
 #===============================================================
 ts: check
+	rm -f chunk-*.js
 	./node_modules/.bin/esbuild inscoreview=src/inscoreglue.ts inscoreglue=glueSrc/basicGlue.ts --bundle --splitting --format=esm --platform=browser --target=es2022 --outdir=.
 	
 #===============================================================
@@ -116,6 +117,7 @@ lib:
 npm: ts $(NPMDIR)/$(NPMLIB) $(NPMDEV)/src $(NPMDIR)/readme.md
 	cp src/lib/inscore.d.ts	$(NPMDIR)
 	cp lib/libINScore.js lib/libINScore.wasm $(NPMDIR)
+	rm -f $(NPMDEV)/chunk-*.js
 	cp $(LIB) $(GLUE) chunk-*.js $(NPMDEV)
 	cp glueSrc/*.ts $(NPMDEV)/src
 	cp -r fonts $(NPMDIR)
@@ -191,7 +193,7 @@ pages/libfaust-wasm.data:
 #===============================================================
 # clean removes the output libraries and the check target output
 clean : 
-	rm -f $(LIB) $(GLUE) $(CHECKOUT)
+	rm -f $(LIB) $(GLUE) chunk-*.js $(CHECKOUT)
 
 #===============================================================
 # check both source groups using the shared TypeScript configuration
