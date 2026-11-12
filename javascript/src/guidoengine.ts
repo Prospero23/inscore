@@ -1,17 +1,17 @@
-
-///<reference types="@grame/guidolib"/>
-
-
 //----------------------------------------------------------------------------
 // GUIDOEngine interface
 //----------------------------------------------------------------------------
-class GuidoEngine {
+export class GuidoEngine {
 
-    private	fEngine    :   GuidoEngineAdapter;
-    private	fPianoRoll :   GUIDOPianoRollAdapter;
-    private	fScoreMap  :   GUIDOScoreMap;
-    private	fFactory   :   GUIDOFactoryAdapter;
-    private	fSPR       :   GUIDOReducedProportionalAdapter;
+    private	fEngine!    :   GuidoEngineAdapter;
+    private	fPianoRoll! :   GUIDOPianoRollAdapter;
+    private fPianoRollTypes: {
+        kSimplePianoRoll: globalThis.PianoRollType;
+        kTrajectoryPianoRoll: globalThis.PianoRollType;
+    } | null = null;
+    private	fScoreMap!  :   GUIDOScoreMap;
+    private	fFactory!   :   GUIDOFactoryAdapter;
+    private	fSPR!       :   GUIDOReducedProportionalAdapter;
 
     constructor () {}
 
@@ -21,6 +21,7 @@ class GuidoEngine {
                 this.fEngine 		= new module.GuidoEngineAdapter();
                 this.fScoreMap      = new module.GUIDOScoreMap();
                 this.fPianoRoll		= new module.GUIDOPianoRollAdapter();
+                this.fPianoRollTypes = module.PianoRollType;
                 this.fFactory		= new module.GUIDOFactoryAdapter();
                 this.fSPR           = new module.GUIDOReducedProportionalAdapter();
                 this.fEngine.init();   
@@ -36,15 +37,15 @@ class GuidoEngine {
     
     ar2gr (ar: ARHandler) : GRHandler                                                  { return this.fEngine.ar2gr (ar); }
     ar2grSettings       (ar: ARHandler, settings: GuidoLayoutSettings): GRHandler      { return this.fEngine.ar2grSettings(ar, settings); }    	
-    updateGR            (gr: GRHandler): GuidoErrCode                                  { return this.fEngine.updateGR(gr); }
-    updateGRSettings    (gr: GRHandler, settings: GuidoLayoutSettings): GuidoErrCode   { return this.fEngine.updateGRSettings (gr, settings); }
+    updateGR            (gr: GRHandler): globalThis.GuidoErrCode                                  { return this.fEngine.updateGR(gr); }
+    updateGRSettings    (gr: GRHandler, settings: GuidoLayoutSettings): globalThis.GuidoErrCode   { return this.fEngine.updateGRSettings (gr, settings); }
 	freeAR              (ar: ARHandler): void           { this.fEngine.freeAR(ar); }
 	freeGR              (gr: GRHandler): void           { this.fEngine.freeGR(gr); }
 	getDefaultLayoutSettings (): GuidoLayoutSettings    { return this.fEngine.getDefaultLayoutSettings(); }
 
-    resizePageToMusic ( gr: GRHandler ): GuidoErrCode   { return this.fEngine.resizePageToMusic ( gr ); }
-    getErrorString    (errCode: GuidoErrCode): string   { return this.fEngine.getErrorString(errCode); }
-    showElement    	  (gr: GRHandler, elt: number, status: boolean): GuidoErrCode    { return this.fEngine.showElement (gr, elt, status); }
+    resizePageToMusic ( gr: GRHandler ): globalThis.GuidoErrCode   { return this.fEngine.resizePageToMusic ( gr ); }
+    getErrorString    (errCode: globalThis.GuidoErrCode): string   { return this.fEngine.getErrorString(errCode); }
+    showElement    	  (gr: GRHandler, elt: number, status: boolean): globalThis.GuidoErrCode    { return this.fEngine.showElement (gr, elt, status); }
     	
     countVoices     (ar: ARHandler): number                 { return this.fEngine.countVoices (ar); }
     getPageCount    (gr: GRHandler): number                 { return this.fEngine.getPageCount (gr); }
@@ -62,7 +63,7 @@ class GuidoEngine {
 
     abstractExport ( gr: GRHandler, page: number )  : string  { return this.fEngine.abstractExport ( gr, page ); }
     binaryExport ( gr: GRHandler, page: number )    : string  { return this.fEngine.binaryExport ( gr, page ); }
-    jsExport ( gr: GRHandler, page: number ): GuidoErrCode    { return this.fEngine.javascriptExport ( gr, page ); }
+    jsExport ( gr: GRHandler, page: number ): globalThis.GuidoErrCode    { return this.fEngine.javascriptExport ( gr, page ); }
 
     setDefaultPageFormat ( format: GuidoPageFormat ): void  { this.fEngine.setDefaultPageFormat ( format ); }
     getDefaultPageFormat () :GuidoPageFormat                { return this.fEngine.getDefaultPageFormat(); }
@@ -80,24 +81,24 @@ class GuidoEngine {
     getVersion () : GuidoVersion        { return this.fEngine.getVersion(); }
     getFloatVersion () : number         { let v = this.fEngine.getVersion(); return parseFloat(v.major + "." + v.minor + v.sub); }
     getVersionStr () : string           { return this.fEngine.getVersionStr(); }
-    checkVersionNums(major: number, minor: number, sub: number): GuidoErrCode  { return this.fEngine.checkVersionNums ( major, minor, sub ); }
+    checkVersionNums(major: number, minor: number, sub: number): globalThis.GuidoErrCode  { return this.fEngine.checkVersionNums ( major, minor, sub ); }
 
     markVoice   (ar: ARHandler, voicenum: number,
         date: GuidoDate, duration: GuidoDate,
-        r: number, g: number, b: number ): GuidoErrCode  { return this.fEngine.markVoice( ar, voicenum, date, duration, r, g, b ); }
+        r: number, g: number, b: number ): globalThis.GuidoErrCode  { return this.fEngine.markVoice( ar, voicenum, date, duration, r, g, b ); }
 
     openParser      (): GuidoParser                         { return this.fEngine.openParser(); }
-    closeParser     (p: GuidoParser): GuidoErrCode          { return this.fEngine.closeParser ( p ); }
+    closeParser     (p: GuidoParser): globalThis.GuidoErrCode          { return this.fEngine.closeParser ( p ); }
     file2AR     (p: GuidoParser, file: string): ARHandler   { return this.fEngine.file2AR ( p, file ); }
     string2AR   (p: GuidoParser, gmn: string): ARHandler    { return this.fEngine.string2AR ( p, gmn ); }
     parserGetErrorCode ( p: GuidoParser ): ParserError      { return this.fEngine.parserGetErrorCode ( p ); }
 
     openStream   (): GuidoStream                     { return this.fEngine.openStream (); }
-    closeStream  (s: GuidoStream): GuidoErrCode      { return this.fEngine.closeStream ( s ); }
+    closeStream  (s: GuidoStream): globalThis.GuidoErrCode      { return this.fEngine.closeStream ( s ); }
     getStream    (s: GuidoStream): string            { return this.fEngine.getStream ( s ); }
     stream2AR    (p: GuidoParser,stream: GuidoStream): ARHandler    { return this.fEngine.stream2AR ( p, stream ); }
-    writeStream  (s: GuidoStream, str: string): GuidoErrCode        { return this.fEngine.writeStream ( s, str ); }
-	resetStream  (s: GuidoStream): GuidoErrCode      { return this.fEngine.resetStream ( s ); }
+    writeStream  (s: GuidoStream, str: string): globalThis.GuidoErrCode        { return this.fEngine.writeStream ( s, str ); }
+	resetStream  (s: GuidoStream): globalThis.GuidoErrCode      { return this.fEngine.resetStream ( s ); }
                        
     getParsingTime  (ar: ARHandler): number              { return this.fEngine.getParsingTime(ar); }
     getAR2GRTime    (gr: GRHandler): number              { return this.fEngine.getAR2GRTime(gr); }
@@ -118,24 +119,30 @@ class GuidoEngine {
     // Guido piano roll interface
     pianoRoll() : GUIDOPianoRollAdapter { return this.fPianoRoll; }
 
-    ar2PianoRoll        ( type: PianoRollType, ar: ARHandler): PianoRoll        { return this.fPianoRoll.ar2PianoRoll ( type, ar ); }
-    destroyPianoRoll    ( pr: PianoRoll ): GuidoErrCode                         { return this.fPianoRoll.destroyPianoRoll ( pr ); }
-    prSetLimits           ( pr: PianoRoll, limits: LimitParams ): GuidoErrCode    { return this.fPianoRoll.setLimits ( pr, limits ); }
-    prEnableKeyboard      ( pr: PianoRoll, status: boolean) : GuidoErrCode        { return this.fPianoRoll.enableKeyboard ( pr, status ); }
+    ar2PianoRoll(type: PianoRollType, ar: ARHandler): PianoRoll | null {
+        if (!this.fPianoRollTypes) return null;
+        const nativeType = type === PianoRollType.kTrajectoryPianoRoll
+            ? this.fPianoRollTypes.kTrajectoryPianoRoll
+            : this.fPianoRollTypes.kSimplePianoRoll;
+        return this.fPianoRoll.ar2PianoRoll(nativeType, ar);
+    }
+    destroyPianoRoll    ( pr: PianoRoll ): globalThis.GuidoErrCode                         { return this.fPianoRoll.destroyPianoRoll ( pr ); }
+    prSetLimits           ( pr: PianoRoll, limits: LimitParams ): globalThis.GuidoErrCode    { return this.fPianoRoll.setLimits ( pr, limits ); }
+    prEnableKeyboard      ( pr: PianoRoll, status: boolean) : globalThis.GuidoErrCode        { return this.fPianoRoll.enableKeyboard ( pr, status ); }
     prGetKeyboardWidth    ( pr: PianoRoll, height: number)  : number              { return this.fPianoRoll.getKeyboardWidth ( pr, height ); }
-    prEnableAutoVoicesColoration (pr: PianoRoll, status: boolean): GuidoErrCode   { return this.fPianoRoll.enableAutoVoicesColoration ( pr, status ); }
+    prEnableAutoVoicesColoration (pr: PianoRoll, status: boolean): globalThis.GuidoErrCode   { return this.fPianoRoll.enableAutoVoicesColoration ( pr, status ); }
     
-    prSetVoiceColor  ( pr: PianoRoll, voice: number, r: number, g: number, b: number, a: number): GuidoErrCode { return this.fPianoRoll.setRGBColorToVoice ( pr, voice, r, g, b, a ); }
-    prSetVoiceNamedColor ( pr: PianoRoll, voice: number, c: string): GuidoErrCode { return this.fPianoRoll.setColorToVoice ( pr, voice, c ); }
-    prRemoveVoiceColor  ( pr: PianoRoll, voice: number )   : GuidoErrCode         { return this.fPianoRoll.removeColorToVoice ( pr, voice ); }
-    prEnableMeasureBars   ( pr: PianoRoll, status: boolean ) : GuidoErrCode       { return this.fPianoRoll.enableMeasureBars ( pr, status ); }
-    prSetPitchLinesDisplayMode (pr: PianoRoll, mode: number): GuidoErrCode        { return this.fPianoRoll.setPitchLinesDisplayMode ( pr, mode ); }
+    prSetVoiceColor  ( pr: PianoRoll, voice: number, r: number, g: number, b: number, a: number): globalThis.GuidoErrCode { return this.fPianoRoll.setRGBColorToVoice ( pr, voice, r, g, b, a ); }
+    prSetVoiceNamedColor ( pr: PianoRoll, voice: number, c: string): globalThis.GuidoErrCode { return this.fPianoRoll.setColorToVoice ( pr, voice, c ); }
+    prRemoveVoiceColor  ( pr: PianoRoll, voice: number )   : globalThis.GuidoErrCode         { return this.fPianoRoll.removeColorToVoice ( pr, voice ); }
+    prEnableMeasureBars   ( pr: PianoRoll, status: boolean ) : globalThis.GuidoErrCode       { return this.fPianoRoll.enableMeasureBars ( pr, status ); }
+    prSetPitchLinesDisplayMode (pr: PianoRoll, mode: number): globalThis.GuidoErrCode        { return this.fPianoRoll.setPitchLinesDisplayMode ( pr, mode ); }
     
     proll2svg ( pr: PianoRoll, w: number, h: number )                           { return this.fPianoRoll.svgExport ( pr, w, h  ); }
     prGetMap  (pr: PianoRoll, width: number, height: number): string            { return this.fPianoRoll.getMap ( pr, width, height  ); }
 
 	prSvgExport(pr: PianoRoll, width: number, height: number): string           { return this.fPianoRoll.svgExport ( pr, width, height  ); }
-    prJsExport (pr: PianoRoll, width: number, height: number): GuidoErrCode     { return this.fPianoRoll.javascriptExport ( pr, width, height  ); }
+    prJsExport (pr: PianoRoll, width: number, height: number): globalThis.GuidoErrCode     { return this.fPianoRoll.javascriptExport ( pr, width, height  ); }
 
     //------------------------------------------------------------------------
     // Reduced Proportional representation
@@ -145,33 +152,33 @@ class GuidoEngine {
 
     //------------------------------------------------------------------------
     // Guido factory interface
-	openMusic   () : GuidoErrCode       { return this.fFactory.openMusic (); }
+	openMusic   () : globalThis.GuidoErrCode       { return this.fFactory.openMusic (); }
 	closeMusic  () : ARHandler          { return this.fFactory.closeMusic (); }
-    openVoice   () : GuidoErrCode       { return this.fFactory.openVoice (); }
-    closeVoice  () : GuidoErrCode       { return this.fFactory.closeVoice (); }
-    openChord   () : GuidoErrCode       { return this.fFactory.openChord (); }
-    closeChord  () : GuidoErrCode       { return this.fFactory.closeChord (); }
-    insertCommata(): GuidoErrCode       { return this.fFactory.insertCommata (); }
+    openVoice   () : globalThis.GuidoErrCode       { return this.fFactory.openVoice (); }
+    closeVoice  () : globalThis.GuidoErrCode       { return this.fFactory.closeVoice (); }
+    openChord   () : globalThis.GuidoErrCode       { return this.fFactory.openChord (); }
+    closeChord  () : globalThis.GuidoErrCode       { return this.fFactory.closeChord (); }
+    insertCommata(): globalThis.GuidoErrCode       { return this.fFactory.insertCommata (); }
 	
-    openEvent   (name: string): GuidoErrCode { return this.fFactory.openEvent ( name ); }
-    closeEvent  (): GuidoErrCode        { return this.fFactory.closeEvent (); }
-    addSharp    (): GuidoErrCode        { return this.fFactory.addSharp (); }
-    addFlat     (): GuidoErrCode        { return this.fFactory.addFlat (); }
-    setEventDots        (dots: number): GuidoErrCode { return this.fFactory.setEventDots ( dots ); }
-    setEventAccidentals (acc: number): GuidoErrCode  { return this.fFactory.setEventAccidentals ( acc ); }  
-    setOctave   (oct: number): GuidoErrCode          { return this.fFactory.setOctave ( oct ); }
-    setDuration (numerator: number, denominator: number): GuidoErrCode  { return this.fFactory.setDuration ( numerator, denominator ); }
+    openEvent   (name: string): globalThis.GuidoErrCode { return this.fFactory.openEvent ( name ); }
+    closeEvent  (): globalThis.GuidoErrCode        { return this.fFactory.closeEvent (); }
+    addSharp    (): globalThis.GuidoErrCode        { return this.fFactory.addSharp (); }
+    addFlat     (): globalThis.GuidoErrCode        { return this.fFactory.addFlat (); }
+    setEventDots        (dots: number): globalThis.GuidoErrCode { return this.fFactory.setEventDots ( dots ); }
+    setEventAccidentals (acc: number): globalThis.GuidoErrCode  { return this.fFactory.setEventAccidentals ( acc ); }
+    setOctave   (oct: number): globalThis.GuidoErrCode          { return this.fFactory.setOctave ( oct ); }
+    setDuration (numerator: number, denominator: number): globalThis.GuidoErrCode  { return this.fFactory.setDuration ( numerator, denominator ); }
 
-    openTag                 (name: string, tagID: number): GuidoErrCode { return this.fFactory.openTag ( name, tagID ); }
-    openRangeTag            (name: string, tagID: number): GuidoErrCode { return this.fFactory.openRangeTag ( name, tagID ); }
-    endTag                  (): GuidoErrCode                { return this.fFactory.endTag(); }
-    closeTag                (): GuidoErrCode                { return this.fFactory.closeTag ( ); }
-    addTagParameterString   (val: string): GuidoErrCode     { return this.fFactory.addTagParameterString ( val ); }
-    addTagParameterInt      (val: number): GuidoErrCode     { return this.fFactory.addTagParameterInt ( val ); }
-    addTagParameterFloat    (val: number): GuidoErrCode     { return this.fFactory.addTagParameterFloat ( val ); }
+    openTag                 (name: string, tagID: number): globalThis.GuidoErrCode { return this.fFactory.openTag ( name, tagID ); }
+    openRangeTag            (name: string, tagID: number): globalThis.GuidoErrCode { return this.fFactory.openRangeTag ( name, tagID ); }
+    endTag                  (): globalThis.GuidoErrCode                { return this.fFactory.endTag(); }
+    closeTag                (): globalThis.GuidoErrCode                { return this.fFactory.closeTag ( ); }
+    addTagParameterString   (val: string): globalThis.GuidoErrCode     { return this.fFactory.addTagParameterString ( val ); }
+    addTagParameterInt      (val: number): globalThis.GuidoErrCode     { return this.fFactory.addTagParameterInt ( val ); }
+    addTagParameterFloat    (val: number): globalThis.GuidoErrCode     { return this.fFactory.addTagParameterFloat ( val ); }
 
-    setParameterName(name: string): GuidoErrCode        { return this.fFactory.setParameterName ( name ); }
-    setParameterUnit(unit: string): GuidoErrCode        { return this.fFactory.setParameterUnit ( unit ); }
+    setParameterName(name: string): globalThis.GuidoErrCode        { return this.fFactory.setParameterName ( name ); }
+    setParameterUnit(unit: string): globalThis.GuidoErrCode        { return this.fFactory.setParameterUnit ( unit ); }
 }
 
 enum GuidoMapping {
@@ -218,7 +225,7 @@ enum GuidoElementSelector {
 }
 
 enum GuidoElementType { kNote = 1, kRest, kEmpty, kBar, kRepeatBegin, kRepeatEnd, kStaff, kSystemSlice, kSystem, kPage } 
-enum PianoRollType { kSimplePianoRoll, kTrajectoryPianoRoll }
+export enum PianoRollType { kSimplePianoRoll, kTrajectoryPianoRoll }
 enum PianoRollLineMode {
     // pîano roll: pitch line display modes
     kPRCLine      =  1,

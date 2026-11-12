@@ -1,17 +1,19 @@
-///<reference path="inscore.d.ts"/>
+import type { TMessage } from "./inscore";
 
-declare var INScoreModule : any;
+declare global {
+    var INScoreModule: any;
+}
         
 //------------------------------------------------------------------------
 // INScore glue interface 
-interface INScoreGlue {
+export interface INScoreGlue {
     getRate(): 		 number; 
 	timeTask ():	 void;
 	sorterTask():	 void;
  }
 
 //----------------------------------------------------------------------------
-interface INScoreAdapter {
+export interface INScoreAdapter {
     constructor: INScoreAdapter;
 
     start(udpport: number, outport: number, errport: number):  INScoreGlue;
@@ -46,7 +48,7 @@ interface INScoreAdapter {
 
 //------------------------------------------------------------------------
 // INScore javascript glue interface 
-interface INScoreJSGlue {
+export interface INScoreJSGlue {
 	showMouse(state: boolean): void;
 	openUrl(url: string):      boolean;
 	startView():               void;
@@ -58,24 +60,24 @@ interface INScoreJSGlue {
 //------------------------------------------------------------------------
 // INScore objects interface 
 
-interface RectVector	{ size(): number; get(i: number) : number; }
-interface FloatVector	{ size(): number; get(i: number) : number; }
-interface StringVector	{ size(): number; get(i: number) : string; }
-interface IntVector 	{ size(): number; get(i: number) : number; }
-interface AudioCnxVector { size(): number; get(i: number) : OAudioCnxInfo; }
-interface MastersVector { size(): number; get(i: number) : OMasterInfo; }
-interface FaustParamValue 	{ address: string; value : number; type: number }
-interface FaustParamValuesVector 	{ size(): number; get(i: number) : FaustParamValue; }
-interface FaustKeyValue 	{ type : number; chan: number; pitch: number; vel: number; }
-interface FaustKeyValuesVector 	{ size(): number; get(i: number) : FaustKeyValue; }
+export interface RectVector	{ size(): number; get(i: number) : number; }
+export interface FloatVector	{ size(): number; get(i: number) : number; }
+export interface StringVector	{ size(): number; get(i: number) : string; }
+export interface IntVector 	{ size(): number; get(i: number) : number; }
+export interface AudioCnxVector { size(): number; get(i: number) : OAudioCnxInfo; }
+export interface MastersVector { size(): number; get(i: number) : OMasterInfo; }
+export interface FaustParamValue 	{ address: string; value : number; type: number }
+export interface FaustParamValuesVector 	{ size(): number; get(i: number) : FaustParamValue; }
+export interface FaustKeyValue 	{ type : number; chan: number; pitch: number; vel: number; }
+export interface FaustKeyValuesVector 	{ size(): number; get(i: number) : FaustKeyValue; }
 
-interface OAudioCnxInfo { objid: number; from: number; to: number }
+export interface OAudioCnxInfo { objid: number; from: number; to: number }
 
-interface OMasterInfo { viewid: number; vstretch: boolean }
+export interface OMasterInfo { viewid: number; vstretch: boolean }
 
-interface OSceneInfo { fullscreen: boolean; }
+export interface OSceneInfo { fullscreen: boolean; }
 
-interface OLineInfo {
+export interface OLineInfo {
 	x1: number;
 	y1: number;
 	x2: number;
@@ -90,10 +92,10 @@ interface OLineInfo {
 	arrowSizeRight: number;
 }
 
-interface OTextInfo { text: string; size: number; family: string; weight: string; style: string; }
-interface OColor { rgb: string; rgba: string; alpha: number; }
+export interface OTextInfo { text: string; size: number; family: string; weight: string; style: string; }
+export interface OColor { rgb: string; rgba: string; alpha: number; }
 
-interface OPen {
+export interface OPen {
 	penWidth:   number;
 	penColor:   string;
 	penStyle:   number;
@@ -102,12 +104,12 @@ interface OPen {
 	alpha: number;
 }
 
-interface OBlur 	{ radius: number; hint: number; }
-interface OColorize { strength: number; color: string; }
-interface OShadow 	{ xOffset: number; yOffset: number; color: string; blur: number; }
-interface OEffect 	{ type: number; blur: OBlur; colorize: OColorize; shadow: OShadow; }
+export interface OBlur 	{ radius: number; hint: number; }
+export interface OColorize { strength: number; color: string; }
+export interface OShadow 	{ xOffset: number; yOffset: number; color: string; blur: number; }
+export interface OEffect 	{ type: number; blur: OBlur; colorize: OColorize; shadow: OShadow; }
 
-interface OEvents {
+export interface OEvents {
 	watchMouseEnter  : boolean;
 	watchMouseLeave  : boolean;
 	watchMouseMove   : boolean;
@@ -116,7 +118,7 @@ interface OEvents {
 	watchMouseDClick : boolean;
 }
 
-interface OPosition {
+export interface OPosition {
 	x:   number;
 	y:   number;
 	width:    number;
@@ -132,7 +134,7 @@ interface OPosition {
 	pen: 	OPen;
 }
 
-interface OUpdateInfos {
+export interface OUpdateInfos {
 	position:  OPosition;
 	color:     OColor;
 	effect:    OEffect;
@@ -149,7 +151,7 @@ interface OUpdateInfos {
 	newclass:      boolean;
 }
 
-interface OArc {
+export interface OArc {
 	width: number;
 	height: number;
 	start:  number;
@@ -157,19 +159,19 @@ interface OArc {
 	closed: boolean;
 }
 
-interface OMedia { playing: boolean; volume: number; rate:  number; mdate:  number; }
-interface OScore 	{ code: string; page: number; mappings: StringVector }
-interface ORadius 	{ x:  number; y:  number; }
-interface ODate 	{ num:   number; denum: number; }
+export interface OMedia { playing: boolean; volume: number; rate:  number; mdate:  number; }
+export interface OScore 	{ code: string; page: number; mappings: StringVector }
+export interface ORadius 	{ x:  number; y:  number; }
+export interface ODate 	{ num:   number; denum: number; }
 
-interface OPRollLimits {
+export interface OPRollLimits {
 	start : ODate;
 	end   : ODate;
 	lowpitch : number;
 	highpitch: number;
 }
 
-interface OPianorollInfos {
+export interface OPianorollInfos {
 	code	: string;
 	keyboard		: boolean;
 	autovoicecolor	: boolean;
@@ -177,17 +179,17 @@ interface OPianorollInfos {
 	limits			: OPRollLimits;
 }
 
-interface OGMNStreamInfos {
+export interface OGMNStreamInfos {
 	stream		: string;
 	reset		: boolean;
 }
 
-interface OAudioNodeInfos {
+export interface OAudioNodeInfos {
 	connect		: AudioCnxVector;
 	disconnect	: AudioCnxVector;
 }
 
-interface OFaustInfos {
+export interface OFaustInfos {
 	compute		: boolean;
 	autoOff		: boolean;
 	voices		: number;
@@ -197,12 +199,12 @@ interface OFaustInfos {
 	values		: FaustParamValuesVector;
 	keys		: FaustKeyValuesVector;
 }
-interface OIOInfos {
+export interface OIOInfos {
 	inputs	: number;
 	outputs	: number;
 }
 
-interface INScoreObject {
+export interface INScoreObject {
     // create(id: number):        INScoreObject;
     // del(obj: INScoreObject):   void;
     adapter(id: number):  INScoreObject;

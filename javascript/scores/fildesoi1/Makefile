@@ -3,7 +3,7 @@ WEBSRC := score.inscore controlPanel.inscore playControl.inscore help.inscore ke
 WEBTXT := $(WEBSRC:%=src/%.txt)
 
 JS     := lib/libINScore.js lib/libINScore.wasm lib/FaustLibrary.js inscoreview.js inscoreglue.js
-LIBS   := $(JS:%=../../%)
+LIBS   := $(JS:%=../../%) $(wildcard ../../chunk-*.js)
 NAME   := FilDeSoi1
 
 
@@ -27,7 +27,7 @@ $(NAME)/fonts:
 	cp -r ../../fonts $(NAME)
 
 $(NAME)/index.html: index.html
-	sed -e 's/script src="..\/..\//script src="/' index.html | sed -e 's/href="..\/..\//href="/' | sed -e 's/inscoreview.js/lib\/inscoreview.js/' | sed -e 's/inscoreglue.js/lib\/inscoreglue.js/' > $@
+	sed -e 's/src="..\/..\//src="/' index.html | sed -e 's/href="..\/..\//href="/' | sed -e 's/inscoreview.js/lib\/inscoreview.js/' | sed -e 's/inscoreglue.js/lib\/inscoreglue.js/' > $@
 
 test:
 	echo $(LIBS)

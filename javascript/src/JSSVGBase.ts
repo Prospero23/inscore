@@ -1,7 +1,8 @@
+import { JSObjectView, type Point } from "./JSObjectView";
+import { TBrushStyle, TPenStyle } from "./inscore";
+import type { INScoreObject, OColor, OPen, OPosition, OShadow } from "./lib/libINScore";
 
-///<reference path="JSObjectView.ts"/>
-
-interface SVGStyle {
+export interface SVGStyle {
     color: string;
     fill: string;
     fillOpacity: string;
@@ -13,7 +14,7 @@ interface SVGStyle {
 	height: string;
 }
 
-interface SVGShape {
+export interface SVGShape {
 	setAttribute (a: string, v: string) : void;
 	getBoundingClientRect() : DOMRect;
 	style: SVGStyle;
@@ -21,7 +22,7 @@ interface SVGShape {
 	clientHeight: number;
 }
 
-abstract class JSSvgBase extends JSObjectView {
+export abstract class JSSvgBase extends JSObjectView {
 	protected fSVG:SVGSVGElement;
 
     constructor(parent: JSObjectView) {

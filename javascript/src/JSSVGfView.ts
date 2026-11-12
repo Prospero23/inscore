@@ -1,8 +1,7 @@
-
-///<reference path="JSSVGView.ts"/>
-///<reference path="TFileLoader.ts"/>
-
-class JSSVGfView extends JSSVGView 
+import { INScoreObject } from "./lib/libINScore";
+import { TFileLoader } from "./TFileLoader";
+import { JSSVGView } from "./JSSVGView";
+export class JSSVGfView extends JSSVGView
 {
     toString() : string			            { return "JSSVGfView"; }
 	

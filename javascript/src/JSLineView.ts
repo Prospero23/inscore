@@ -1,7 +1,9 @@
+import { JSSvgBase, type SVGShape } from "./JSSVGBase";
+import type { JSObjectView } from "./JSObjectView";
+import { TBrushStyle } from "./inscore";
+import type { INScoreObject, OPen } from "./lib/libINScore";
 
-///<reference path="JSSVGBase.ts"/>
-
-class JSLineView extends JSSvgBase {
+export class JSLineView extends JSSvgBase {
 
     protected fLine: SVGLineElement;
 
@@ -19,7 +21,9 @@ class JSLineView extends JSSvgBase {
 
 	getRatio()	: number { 
 		let div = this.getElement();
-		return Math.max (Math.min(div.clientWidth, div.clientHeight) / Math.min(div.parentElement.clientWidth, div.parentElement.clientHeight), 0.022); 
+		let parent = div.parentElement;
+		if (!parent) return 0.022;
+		return Math.max (Math.min(div.clientWidth, div.clientHeight) / Math.min(parent.clientWidth, parent.clientHeight), 0.022);
 	}
 
 	updateSpecial ( obj: INScoreObject)	: boolean {		

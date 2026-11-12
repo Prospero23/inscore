@@ -1,7 +1,8 @@
+import { JSSvgBase, type SVGShape } from "./JSSVGBase";
+import type { JSObjectView } from "./JSObjectView";
+import type { INScoreObject } from "./lib/libINScore";
 
-///<reference path="JSSVGBase.ts"/>
-
-class JSRectView extends JSSvgBase {
+export class JSRectView extends JSSvgBase {
     protected fRect: SVGRectElement;
     
     constructor(parent: JSObjectView) {

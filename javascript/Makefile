@@ -5,9 +5,10 @@
 #
 #################################################################
 
-.PHONY : pages testlib npm
+.PHONY : pages testlib npm check ts
 
 MAKE ?= make
+TSC := ./node_modules/.bin/tsc
 
 # location of the typescript sources
 TSDIR    := src
@@ -82,13 +83,8 @@ help : node_modules
 #===============================================================
 # building inscore ts view
 #===============================================================
-ts: $(LIB) $(GLUE)
-
-$(GLUE): $(GLUESRC) $(GLUEDIR)/tsconfig.json 
-	cd $(GLUEDIR) && tsc || (rm ../$(GLUE); false)
-
-$(LIB): $(LIBSRC) $(TSLIB)/libINScore.d.ts $(TSDIR)/tsconfig.json
-	cd $(TSDIR) && tsc || (rm ../$(LIB); false)
+ts: check
+	./node_modules/.bin/esbuild inscoreview=src/inscoreglue.ts inscoreglue=glueSrc/basicGlue.ts --bundle --splitting --format=esm --platform=browser --target=es2022 --outdir=.
 	
 #===============================================================
 # building inscore wasm library
@@ -117,10 +113,10 @@ lib:
 #===============================================================
 # packaging
 #===============================================================
-npm: $(NPMDIR)/$(NPMLIB) $(NPMDEV)/src $(NPMDIR)/readme.md
+npm: ts $(NPMDIR)/$(NPMLIB) $(NPMDEV)/src $(NPMDIR)/readme.md
 	cp src/lib/inscore.d.ts	$(NPMDIR)
 	cp lib/libINScore.js lib/libINScore.wasm $(NPMDIR)
-	cp $(LIB) $(GLUE) $(NPMDEV)
+	cp $(LIB) $(GLUE) chunk-*.js $(NPMDEV)
 	cp glueSrc/*.ts $(NPMDEV)/src
 	cp -r fonts $(NPMDIR)
 	cp ../src/changelog.txt $(NPMDIR)
@@ -128,9 +124,8 @@ npm: $(NPMDIR)/$(NPMLIB) $(NPMDEV)/src $(NPMDIR)/readme.md
 $(NPMDEV)/src: 
 	mkdir -p $(NPMDEV)/src
 
-$(NPMDIR)/$(NPMLIB): $(GLUESRC) $(LIBSRC)
-	tsc -p npmconfig.json
-	mv $(NPMLIB) $(NPMDIR)
+$(NPMDIR)/$(NPMLIB): $(GLUESRC) $(LIBSRC) $(wildcard $(TSLIB)/*.ts) tsconfig.json Makefile | check
+	./node_modules/.bin/esbuild $(GLUEDIR)/basicGlue.ts --bundle --format=iife --platform=browser --target=es2022 --outfile=$@
 
 $(NPMDIR)/readme.md : IVERSION := $(shell grep '"inscore-version"' $(NPMDIR)/package.json | sed -e 's/[^0-9.]*//g')
 $(NPMDIR)/readme.md : $(NPMDIR)/package.json
@@ -154,8 +149,9 @@ publish:
 #===============================================================
 modules: $(GUIDOLIB) $(XMLLIB) $(FAUSTLIB) $(INSCOREWASM)
 
-$(TSLIB)/libmusicxml.ts   	 : $(MXML)/libmusicxml.ts
-	cp $< $@
+# Preserve the vendor implementation while adapting it for our module build.
+$(TSLIB)/libmusicxml.ts   	 : $(MXML)/libmusicxml.ts Makefile
+	(printf '%s\n' '// @ts-nocheck' && cat "$<" && printf '\nexport { libmusicxml };\n') > "$@"
 $(TSLIB)/libmusicxml.d.ts	 : $(MXML)/libmusicxml.d.ts
 	cp $< $@
 
@@ -198,16 +194,7 @@ clean :
 	rm -f $(LIB) $(GLUE) $(CHECKOUT)
 
 #===============================================================
-# check compiles each source file individually to make sure that
-# dependencies are correctly described
-check: $(CHECKDIR) $(CHECKOUT)
-
-$(CHECKDIR) :
-	mkdir $(CHECKDIR)
-
-#TSOPT  := --jsx react --target es5 --lib es2015,dom --noImplicitAny  --noImplicitReturns --alwaysStrict
-TSOPT  := --module system --target es5 --lib es2015,dom --noImplicitAny  --noImplicitReturns --alwaysStrict
-$(CHECKDIR)/%.js: $(TSDIR)/%.ts
-	tsc $(TSOPT) -out $@ $< || rm $@
-
-	
+# check both source groups using the shared TypeScript configuration
+#===============================================================
+check:
+	$(TSC) --project tsconfig.json

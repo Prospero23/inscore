@@ -1,9 +1,16 @@
-
-///<reference path="../src/lib/inscore.d.ts"/>
-///<reference path="../src/inscoreglue.ts"/>
-///<reference path="constants.ts"/>
-
-class INScoreDiv {
+import { gGlue } from "../src/inscoreglue";
+import { kTextType,
+	kVerovioType,
+	kMusicxmlType,
+	kSvgType,
+	kHtmlType,
+	kGuidoCodeType,
+	kFaustType,
+	kImgType,
+	kVideoType,
+	kInscore,
+	kInscore2 } from "./constants";
+export class INScoreDiv {
 	fDiv: 		HTMLElement;
 	fVersion:	number;			// the inscore lang version supported by the div
 	constructor(div: HTMLElement, version: number) {
@@ -16,8 +23,8 @@ class INScoreDiv {
 // declare var gGlue: IGlue;
 
 //----------------------------------------------------------------------------
-class INScoreBase {
-	private fDivs: Array<INScoreDiv>;
+export class INScoreBase {
+	private fDivs: Array<INScoreDiv> = [];
 	private fExtHandlers: { [id: string] : string; } = {};
 
     constructor() {
@@ -95,6 +102,7 @@ class INScoreBase {
     //------------------------------------------------------------------------
     // inscore div initialization
 	initDiv (div: HTMLElement, v2: boolean) : void {
+		if (!inscore) return;
 		// do not post the message otherwise content will be loaded before the scene is created
 		inscore.loadInscore (this.getSceneAddress(div) + " new;", false);	
 		let content = div.innerText;
@@ -113,6 +121,7 @@ class INScoreBase {
 	}
 
 	loadInscore(content: string, v2: boolean) : void {
+		if (!inscore) return;
 		if (v2) inscore.loadInscore2 (content);
 		else 	inscore.loadInscore (content, true);
 	}
@@ -134,7 +143,11 @@ class INScoreBase {
 	fetchInscore (file: File, v2: boolean) : void {
 		let reader = new FileReader();				
 		reader.readAsText (file);
-		reader.onloadend = (event) => { this.loadFromFile (reader.result.toString(), v2, file.name)};
+		reader.onloadend = (event) => {
+			const result = reader.result;
+			if (typeof result !== "string") return;
+			this.loadFromFile (result.toString(), v2, file.name)
+		};
 	}
 
 
@@ -164,9 +177,13 @@ class INScoreBase {
 		let reader = new FileReader();				
 		reader.readAsText (file);
 		reader.onloadend = (event) => {
+			const result = reader.result;
+			if (typeof result !== "string") return;
+
+			if (!inscore) return;
 			let msg = inscore.newMessageM ("set");
 			inscore.msgAddStr (msg, type);
-			inscore.msgAddStr (msg, reader.result.toString());
+			inscore.msgAddStr (msg, result.toString());
 			inscore.postMessage (dest, msg);
 		};
 	}
@@ -195,7 +212,7 @@ class INScoreBase {
 	//------------------------------------------------------------------------
     // files drop support
 	filedropped(e : DragEvent) : void {
-		let filelist = e.dataTransfer.files;
+		let filelist = e.dataTransfer?.files;
 		if (!filelist) return;
 	
 		let filecount = filelist.length;
@@ -216,11 +233,12 @@ class INScoreBase {
 	}
 
 	drop( e : DragEvent) : void {
+		if (e.dataTransfer == null) return;
 		let data = e.dataTransfer.getData("Text");
 		if (data)	this.loadFromText (data, false);
 		else 		this.filedropped (e);
 		let div = <HTMLElement>e.target;
-		div.style.border = div.getAttribute('savedborder');
+		div.style.border = div.getAttribute('savedborder') ?? "";
 	}
 		
     //------------------------------------------------------------------------
@@ -249,6 +267,7 @@ class INScoreBase {
     // activate drag & drop on inscore divs
 	private watchResize () : void {
 		window.addEventListener ("resize", (e: UIEvent) : void => { 
+			if (!inscore) return;
 			for (let i=0; i< this.fDivs.length; i++) {
 				inscore.postMessageStr (this.getSceneAddress(this.fDivs[i].fDiv), "refresh");
 			}

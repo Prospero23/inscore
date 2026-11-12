@@ -3,6 +3,7 @@ node_modules/
 
 inscoreview.js
 inscoreglue.js
+/chunk-*.js
 test.js
 TSCheck
 

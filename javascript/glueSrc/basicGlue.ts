@@ -1,10 +1,10 @@
 
-///<reference path="inscoreBase.ts"/>
+import { INScoreBase } from "./inscoreBase";
 
-//----------------------------------------------------------------------------
-class BasicGlue extends INScoreBase {
+export class BasicGlue extends INScoreBase {
 
 	accept (event : DragEvent) : boolean {
+		if (event.dataTransfer == null) return false;
 		let items = event.dataTransfer.items;
 		for (let i=0; i< items.length; i++) {
 			switch (items[i].kind) {
@@ -28,7 +28,7 @@ class BasicGlue extends INScoreBase {
 	dragLeave (event : DragEvent) : void {
 		event.preventDefault();
 		let div = <HTMLElement>event.currentTarget;
-		div.style.border = div.getAttribute('savedborder');
+		div.style.border = div.getAttribute('savedborder') ?? "";
 	}
 
 }

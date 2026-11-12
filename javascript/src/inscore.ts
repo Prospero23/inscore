@@ -1,16 +1,17 @@
-
-///<reference path="lib/inscore.d.ts"/>
-///<reference path="lib/libINScore.d.ts"/>
+import { INScoreObject, INScoreAdapter } from "./lib/libINScore";
+import { INScoreJSGlue } from "./lib/libINScore";
+import { TMessage } from "./lib/inscore";
+import type { INScoreGlue } from "./lib/libINScore";
 
 //----------------------------------------------------------------------------
 // INScore interface
 //----------------------------------------------------------------------------
-class INScore {
+export class INScore {
 
     private static fObjects:   INScoreObject;
-    private	fInscore       :   INScoreAdapter;
-    private	fInscoreGlue   :   INScoreGlue;
-    private	fJSGlue        :   INScoreJSGlue;
+    private	fInscore!       :   INScoreAdapter;
+    private	fInscoreGlue!   :   INScoreGlue;
+    private	fJSGlue!        :   INScoreJSGlue;
 
     async initialise():Promise<any> { 
         return new Promise( (success: any, failure: any) => {
@@ -82,11 +83,15 @@ class INScore {
 	sorterTask()	: void          { this.fInscoreGlue.sorterTask(); }
 }
 
-enum TPenStyle 		{ kSolid, kDash, kDot, kDashDot, kDashDotDot }
-enum TBrushStyle 	{ kDense1, kDense2, kDense3, kDense4, kDense5, kDense6, kDense7,
+export enum TPenStyle 		{ kSolid, kDash, kDot, kDashDot, kDashDotDot }
+export enum TBrushStyle 	{ kDense1, kDense2, kDense3, kDense4, kDense5, kDense6, kDense7,
 					  kNoBrush, kBrushHor, kBrushVer, kCross, kBDiag, kFDiag, kDiagCross }
-enum ArrowHead      { NONE, TRIANGLE, DIAMOND, DISK }
-enum Effect 	{ kNone, kBlur, kColorize, kShadow };
-enum Blurhint	{ kPerformance, kQuality, kAnimation };
+export enum ArrowHead      { NONE, TRIANGLE, DIAMOND, DISK }
+export enum Effect 	{ kNone, kBlur, kColorize, kShadow };
+export enum Blurhint	{ kPerformance, kQuality, kAnimation };
 
-var inscore : INScore = null;
+declare global {
+    var inscore: INScore | null;
+}
+
+globalThis.inscore = null;

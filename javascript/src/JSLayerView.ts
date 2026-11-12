@@ -1,7 +1,7 @@
+import { JSObjectView } from "./JSObjectView";
+import type { INScoreObject } from "./lib/libINScore";
 
-///<reference path="JSObjectView.ts"/>
-
-class JSLayerView extends JSObjectView {
+export class JSLayerView extends JSObjectView {
 
     constructor(parent: JSObjectView) {
 		super( document.createElement('div'), parent); 

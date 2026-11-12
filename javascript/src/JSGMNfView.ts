@@ -1,8 +1,7 @@
-
-///<reference path="JSGMNView.ts"/>
-///<reference path="TFileLoader.ts"/>
-
-class JSGMNfView extends JSGMNView { 
+import { INScoreObject } from "./lib/libINScore";
+import { TFileLoader } from "./TFileLoader";
+import { JSGMNView } from "./JSGMNView";
+export class JSGMNfView extends JSGMNView {
 
 	toString() : string		    { return "JSGMNfView"; }
 

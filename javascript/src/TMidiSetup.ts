@@ -1,10 +1,8 @@
-///<reference types="@types/webmidi"/>
-///<reference path="lib/libINScore.d.ts"/>
+import { INScoreObject } from "./lib/libINScore";
 
-
-class MidiSetup {
+export class MidiSetup {
     static fClients : Array<INScoreObject> = [];
-    static fMIDIAccess : WebMidi.MIDIAccess;
+    static fMIDIAccess : MIDIAccess;
     static fVerbose : number;
     static fMidiStatus : Map<number, string>;
 
@@ -40,8 +38,9 @@ class MidiSetup {
         MidiSetup.fMidiStatus.set(0xff, "Reset");
     }
  
-    static print (event: WebMidi.MIDIMessageEvent)
+    static print (event: MIDIMessageEvent)
     {
+        if (event.data === null) return;
         let status = event.data[0];
         if ((MidiSetup.fVerbose === 1) && (status >= 0xf0)) return;
         if (status >= 0xf0)     // system events: displays only the status
@@ -51,16 +50,18 @@ class MidiSetup {
         }
     }
 
-    static midiInput(event: WebMidi.MIDIMessageEvent) {
+    static midiInput(event: MIDIMessageEvent) {
+        const data = event.data;
+        if (data === null) return;
         if (MidiSetup.fVerbose) MidiSetup.print (event);
         MidiSetup.fClients.forEach((client) => {
             // filter msg from 240 to 255 (system msg)
-            if (event.data[0] >= 240)
+            if (data[0] >= 240)
                 return;
-            if (event.data[2] === undefined) {
-                client.midiEvent (event.data[0], event.data[1], 0);
+            if (data[2] === undefined) {
+                client.midiEvent (data[0], data[1], 0);
             } else
-                client.midiEvent (event.data[0], event.data[1], event.data[2]);
+                client.midiEvent (data[0], data[1], data[2]);
         });
     }
 
@@ -70,11 +71,12 @@ class MidiSetup {
         MidiSetup.event ("error");
     }
 
-    static onConnectionCallback(access : WebMidi.MIDIAccess) {
+    static onConnectionCallback(access : MIDIAccess) {
         MidiSetup.fMIDIAccess = access;
-        access.onstatechange = function(e: WebMidi.MIDIConnectionEvent) {
-            if (e.port.type === "input") {
-                let port = e.port as WebMidi.MIDIInput;
+        access.onstatechange = function(e: MIDIConnectionEvent) {
+            if (e.port === null ) return;
+            else if (e.port.type === "input") {
+                let port = e.port as MIDIInput;
                 if (e.port.state === "connected") {
                     port.onmidimessage = MidiSetup.midiInput;
                 } else if (e.port.state  === "disconnected") {
@@ -83,18 +85,18 @@ class MidiSetup {
             }
         }
         MidiSetup.event ("ready");
-        access.inputs.forEach((input: WebMidi.MIDIInput) => {
+        access.inputs.forEach((input: MIDIInput) => {
             input.onmidimessage = MidiSetup.midiInput;
         }) 
     }
 
     static verbose (mode: number)           { MidiSetup.fVerbose = mode; }
-    static event( type: string)             { inscore.postMessageStrStr ("/ITL/midi", "event", type); }
+    static event( type: string)             { inscore?.postMessageStrStr ("/ITL/midi", "event", type); }
 
     static init() {
         MidiSetup.initmap();
         if (typeof(navigator.requestMIDIAccess) !== "undefined" && MidiSetup.fMIDIAccess !== null) {
-            navigator.requestMIDIAccess({"sysex": true}).then( (access : WebMidi.MIDIAccess) => {
+            navigator.requestMIDIAccess({"sysex": true}).then( (access : MIDIAccess) => {
                     MidiSetup.onConnectionCallback (access);
                 }, this.onErrorCallback
             );
@@ -117,3 +119,11 @@ class MidiSetup {
         }
     }
 }
+
+type MidiSetupClass = typeof MidiSetup;
+
+declare global {
+    var MidiSetup: MidiSetupClass;
+}
+
+globalThis.MidiSetup = MidiSetup;

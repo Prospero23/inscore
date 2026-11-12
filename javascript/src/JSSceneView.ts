@@ -1,7 +1,9 @@
-
-///<reference path="JSObjectView.ts"/>
-///<reference path="TMidiSetup.ts"/>
-///<reference path="navigator.ts"/>
+import { JSObjectView } from "./JSObjectView";
+import type { Point } from "./JSObjectView";
+import { MidiSetup } from "./TMidiSetup";
+import { Safari, Explorer, Edge, AndroidOS } from "./navigator";
+import { INScore } from "./inscore";
+import type { INScoreObject, OColor, OPosition } from "./lib/libINScore";
 
 interface fsElement extends HTMLElement {
 	webkitRequestFullscreen() : void;
@@ -13,12 +15,12 @@ interface fsDocument extends Document {
 }
  
 //----------------------------------------------------------------------------
-class JSSceneView extends JSObjectView {
+export class JSSceneView extends JSObjectView {
 	
 	fAbsolutePos: boolean;
 
-    constructor(id: string, objid: number) {
-		let div = document.getElementById(id);
+    constructor(div: HTMLElement, objid: number) {
+		let id = div.id;
 		let style = window.getComputedStyle(div, null);
 		let absolute = style.position == "absolute";
 		super(div, null, absolute);
@@ -35,11 +37,12 @@ class JSSceneView extends JSObjectView {
 		// });
 		if (screen.orientation)
 			screen.orientation.addEventListener('change', function(e) { 
+				if (!inscore) return;
 				inscore.postMessageStrStr ("/ITL/" + id, "event", (screen.orientation.type.startsWith("portrait") ? "portrait" : "landscape"));
 				inscore.postMessageStr ("/ITL/" + id, "refresh"); });
 		MidiSetup.addListener (obj);
 	}
-	clone (parent: JSObjectView) : JSObjectView { return null; }
+	clone (parent: JSObjectView) : JSObjectView | null { return null; }
 	toString() : string					{ return "JSSceneView"; }
 
 	getOrigin() : Point { 
@@ -61,8 +64,14 @@ class JSSceneView extends JSObjectView {
 	}
 	getScale(scale: number) : number { return scale; } 
 
-	parentWidth() : number			{ return this.getElement().parentElement.offsetWidth; }
-	parentHeight() : number			{ return this.getElement().parentElement.offsetHeight; }
+	parentWidth() : number {
+		let parent = this.getElement().parentElement;
+		return parent ? parent.offsetWidth : 0;
+	}
+	parentHeight() : number {
+		let parent = this.getElement().parentElement;
+		return parent ? parent.offsetHeight : 0;
+	}
 
 	// this method is called by the model to get the real scene width and height
 	static getWidth (id: number) : number {
@@ -92,7 +101,7 @@ class JSSceneView extends JSObjectView {
 		} else if (elt.msExitFullscreen) { /* IE11 */
 			elt.msExitFullscreen();
 		}
-		this.getElement().removeEventListener ("fullscreenchange", (event: UIEvent) => { this.closeFullscreen(event)} );
+		this.getElement().removeEventListener ("fullscreenchange", (event: Event) => { this.closeFullscreen(event)} );
 	}
 
 	private enterFullscreen(elt: fsElement) {
@@ -107,17 +116,17 @@ class JSSceneView extends JSObjectView {
 			console.log ("JSSceneView.enterFullscreen: no handler available.")
 			return;
 		}
-		this.getElement().addEventListener ("fullscreenchange", (event: UIEvent) => { this.closeFullscreen(event)} );
+		this.getElement().addEventListener ("fullscreenchange", (event: Event) => { this.closeFullscreen(event)} );
 	}
 
 	private inFullscreen () : boolean {
-		return document.fullscreenElement && (document.fullscreenElement == this.getElement());
+		return document.fullscreenElement == this.getElement();
 	}
 
-	private closeFullscreen (event: UIEvent) { 		// called on fullscreen event
+	private closeFullscreen (event: Event) { 		// called on fullscreen event
 		if (!this.inFullscreen()) {
-			inscore.postMessageStrI ("/ITL/" + this.getElement().id, "fullscreen", 0);
-			this.getElement().removeEventListener ("fullscreenchange", (event: UIEvent) => { this.closeFullscreen(event)} );
+			if (inscore) inscore.postMessageStrI ("/ITL/" + this.getElement().id, "fullscreen", 0);
+			this.getElement().removeEventListener ("fullscreenchange", (event: Event) => { this.closeFullscreen(event)} );
 		}
 	}
 
@@ -148,3 +157,11 @@ class JSSceneView extends JSObjectView {
 		div.style.opacity 	 = color.alpha.toString();
 	}
 }
+
+type JSSceneViewClass = typeof JSSceneView;
+
+declare global {
+    var JSSceneView: JSSceneViewClass;
+}
+
+globalThis.JSSceneView = JSSceneView;

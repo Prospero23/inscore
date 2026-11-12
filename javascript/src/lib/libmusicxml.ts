@@ -1,3 +1,4 @@
+// @ts-nocheck
 
 ///<reference path="libmusicxml.d.ts"/>
 
@@ -35,3 +36,5 @@ class libmusicxml {
 	string2guido (xml: string, genBars: boolean)		{ return this.fLibrary.string2guido (xml, genBars); }
 	xmlStringTranspose (xml: string, interval: number)	{ return this.fLibrary.xmlStringTranspose (xml, interval); }
 }
+
+export { libmusicxml };

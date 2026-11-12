@@ -1,10 +1,11 @@
+import { TMedia } from "./TMedia";
+import { INScoreObject } from "./lib/libINScore";
+import { AIOScanner } from "./AIOScanner";
+import { JSObjectView } from "./JSObjectView";
+import { AudioTools } from "./AudioTools";
+import type { OShadow } from "./lib/libINScore";
 
-///<reference path="JSAutoSize.ts"/>
-///<reference path="TMedia.ts"/>
-///<reference path="AIOScanner.ts"/>
-///<reference path="AudioTools.ts"/>
-
-class JSAudioView extends TMedia { 
+export class JSAudioView extends TMedia {
     fAudio: HTMLAudioElement;
     
     constructor(parent: JSObjectView) {

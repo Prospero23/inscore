@@ -1,10 +1,20 @@
+import { INScore } from "./inscore";
+import { inscorelibs } from "./libraries";
+import { scanPlatform, scanNavigator } from "./navigator";
 
-///<reference path="inscore.ts"/>
-///<reference path="libraries.ts"/>
-///<reference path="navigator.ts"/>
+// Publish native callbacks before the WASM engine starts.
+import "./JSViewFactory";
+import "./JSObjectView";
+import "./JSSceneView";
+import "./JSGMNView";
+import "./JSAudioioView";
+import "./TMidiSetup";
+import "./TConnections";
+import "./TAppl";
+import "./TJavascript";
+import "./download";
 
-//----------------------------------------------------------------------------
-class INScoreGlue {
+export class INScoreGlue {
 	private fInscore : INScore;
 	private fTimeTask : number = 0;
 	private fSorterTask : number = 0;
@@ -36,16 +46,30 @@ class INScoreGlue {
 	}
 }
 
-var gGlue = new INScoreGlue();
+export var gGlue = new INScoreGlue();
 
 // default function to show the log window (if any)
 // should be overriden by client applications
-function showlog (status: boolean) {}
+export function showlog (status: boolean) {}
 
 // glue functions
 // should be overriden by client applications
-function showMouse (state: boolean) {}
+export function showMouse (state: boolean) {}
 
-function openUrl (url: string) {
+export function openUrl (url: string) {
 	window.open (url);
 }
+
+type ShowlogFunction = typeof showlog;
+type ShowMouseFunction = typeof showMouse;
+type OpenUrlFunction = typeof openUrl;
+
+declare global {
+    var showlog: ShowlogFunction;
+    var showMouse: ShowMouseFunction;
+    var openUrl: OpenUrlFunction;
+}
+
+globalThis.showlog = showlog;
+globalThis.showMouse = showMouse;
+globalThis.openUrl = openUrl;

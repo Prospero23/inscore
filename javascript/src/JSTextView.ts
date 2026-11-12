@@ -1,7 +1,7 @@
+import { JSHtmlView } from "./JSHtmlView";
+import type { JSObjectView } from "./JSObjectView";
 
-///<reference path="JSHtmlView.ts"/>
-
-class JSTextView extends JSHtmlView {
+export class JSTextView extends JSHtmlView {
 
     constructor(parent: JSObjectView) {
 		super(parent); 

@@ -2,12 +2,12 @@
 //----------------------------------------------------------------------------
 // a download function
 //----------------------------------------------------------------------------
-class Download {
+export class Download {
 	static text (filename : string, text: string) : void {
 		Download.file (filename, encodeURIComponent(text), "text/plain;charset=utf-8,");
 	}
 	static wasm (filename : string, data: Uint8Array) : void {
-		let blob = new Blob([data], {type: "octet/stream"});
+		let blob = new Blob([data as Uint8Array<ArrayBuffer>], {type: "octet/stream"});
 		Download.file2 (filename, blob);
 		// let url = window.URL.createObjectURL(blob);
 		// var a = document.createElement('a');
@@ -31,7 +31,7 @@ class Download {
 		document.body.removeChild(element);
 	}
 
-	private static file2 (filename : string, data: string | Blob) : void {
+	private static file2 (filename : string, data: Blob) : void {
 		let url = window.URL.createObjectURL(data);
 		var a = document.createElement('a');
 		a.style.display = 'none';
@@ -43,3 +43,11 @@ class Download {
 		window.URL.revokeObjectURL(url);
 	}
 }
+
+type DownloadClass = typeof Download;
+
+declare global {
+    var Download: DownloadClass;
+}
+
+globalThis.Download = Download;

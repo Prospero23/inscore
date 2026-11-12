@@ -1,12 +1,13 @@
+import { AudioObject, AudioRouting } from "./AudioObject";
+import { INScoreObject } from "./lib/libINScore";
+import { AIOScanner } from "./AIOScanner";
+import { JSObjectView } from "./JSObjectView";
+import { AudioTools } from "./AudioTools";
+import { INScore } from "./inscore";
 
-///<reference path="JSObjectView.ts"/>
-///<reference path="AudioObject.ts"/>
-///<reference path="AIOScanner.ts"/>
-///<reference path="AudioTools.ts"/>
-
-class JSAudioioView extends JSObjectView implements AudioObject {
-    fAudioNode : AudioNode = null;
-    protected fRouter : AudioRouting = null;
+export class JSAudioioView extends JSObjectView implements AudioObject {
+    fAudioNode : AudioNode | null = null;
+    protected fRouter : AudioRouting | null = null;
 
     constructor(parent: JSObjectView) {
 		super(document.createElement('div'), parent); 
@@ -17,9 +18,9 @@ class JSAudioioView extends JSObjectView implements AudioObject {
     getNumInputs() : number     { return this.fAudioNode ? this.fAudioNode.numberOfInputs : 0; } 
     getNumOutputs() : number    { return this.fAudioNode ? this.fAudioNode.numberOfOutputs : 0; }
     getNumChans() : number      { return this.fAudioNode ? this.fAudioNode.channelCount : 0; }
-    getAudioNode() : AudioNode  { return this.fAudioNode; }
-    getSplitter() : AudioNode   { return this.fRouter.getSplitter(); }
-    getMerger() : AudioNode     { return this.fRouter.getMerger(); }
+    getAudioNode() : AudioNode | null { return this.fAudioNode; }
+    getSplitter() : AudioNode | null  { return this.fRouter?.getSplitter() ?? null; }
+    getMerger() : AudioNode | null    { return this.fRouter?.getMerger() ?? null; }
 
     clone (parent: JSObjectView) : JSObjectView {
         return new JSAudioioView(parent);
@@ -33,20 +34,28 @@ class JSAudioioView extends JSObjectView implements AudioObject {
     }
 
     static init (id: number ) {
-        let input = <JSAudioioView>JSObjectView.getObjectView(id);
-        let obj = INScore.objects().adapter(input.getIObject());
+        let input = JSObjectView.getObjectView(id);
+        if (!(input instanceof JSAudioioView)) return;
+        let objectId = input.getIObject();
+        if (objectId === null) return;
+        let obj = INScore.objects().adapter(objectId);
         input.initInput (obj); 
     }
 
     initInput (obj: INScoreObject) {
         if (obj.getName() != AIOScanner.kInputName) return;
+        const audioContext = AIOScanner.fAudioContext;
+        if (!audioContext) {
+            obj.event("error");
+            return;
+        }
 
         if (navigator.mediaDevices) {
             navigator.mediaDevices.getUserMedia({audio: true, video: false}).then((stream: MediaStream) => {
-                this.fAudioNode = AIOScanner.fAudioContext.createMediaStreamSource(stream);
+                this.fAudioNode = audioContext.createMediaStreamSource(stream);
                 this.fRouter  = new AudioRouting (this.fAudioNode, this.fAudioNode.channelCount, this.toString());
                 AIOScanner.send(obj.getOSCAddress(), 0, this.fAudioNode.channelCount);
-                inscore.postMessageStrStr (obj.getOSCAddress(), "event", "ready");
+                inscore?.postMessageStrStr (obj.getOSCAddress(), "event", "ready");
             })
             .catch(function(err) {
                 console.log("Can't get audio input device: " + err);
@@ -73,3 +82,11 @@ class JSAudioioView extends JSObjectView implements AudioObject {
         return true;
     }
 }
+
+type JSAudioioViewClass = typeof JSAudioioView;
+
+declare global {
+    var JSAudioioView: JSAudioioViewClass;
+}
+
+globalThis.JSAudioioView = JSAudioioView;

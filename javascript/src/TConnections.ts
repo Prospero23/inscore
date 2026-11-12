@@ -1,9 +1,5 @@
 
-///<reference path="lib/libINScore.d.ts"/>
-///<reference path="inscore.ts"/>
-
-//-----------------------------------------------------------------------------------
-abstract class TConnection {
+export abstract class TConnection {
 	// fSocket: WebSocket = null;
 	// fEventSrc: EventSource = null;
 	fUrl: string;
@@ -26,7 +22,7 @@ abstract class TConnection {
 			let json = JSON.parse(data);
 			if (json['data'] && (json['method'] == "post")) {
 				console.log ("Remote msg from " + e.origin + ": " + json['data']);
-				inscore.loadInscore (json['data']);
+				if (inscore) inscore.loadInscore (json['data']);
 			}
 			else console.log ("Incorrect JSON message received from " + e.origin + ": " + json);
 		}
@@ -43,7 +39,7 @@ abstract class TConnection {
 
 //-----------------------------------------------------------------------------------
 class THTTPConnection extends TConnection {
-	private fEventSrc: EventSource = null;
+	private fEventSrc: EventSource | null = null;
 	
 	constructor (url: string) {
 		super(url);
@@ -70,7 +66,7 @@ class THTTPConnection extends TConnection {
 
 //-----------------------------------------------------------------------------------
 class TWSConnection extends TConnection {
-	private fSocket: WebSocket = null;
+	private fSocket: WebSocket | null = null;
 	
 	constructor (url: string) {
 		super(url);
@@ -101,7 +97,7 @@ interface TCnxState { url: string, state: number }
 // handle connect calls from inscore
 // manages the list of connections
 //-----------------------------------------------------------------------------------
-class TConnections {
+export class TConnections {
 	static fCnx : Array<TConnection> = [];
 
 	static connect (cnx: string, clear: boolean ) : boolean {
@@ -134,3 +130,11 @@ class TConnections {
 		return out;
 	}
 }
+
+type TConnectionsClass = typeof TConnections;
+
+declare global {
+    var TConnections: TConnectionsClass;
+}
+
+globalThis.TConnections = TConnections;

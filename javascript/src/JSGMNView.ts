@@ -1,17 +1,20 @@
+import { JSSvgBase } from "./JSSVGBase";
+import type { SVGShape } from "./JSSVGBase";
+import { JSObjectView } from "./JSObjectView";
+import type { GuidoEngine } from "./guidoengine";
+import { INScore } from "./inscore";
+import { WindowsOS, UnixOS, AndroidOS } from "./navigator";
+import type { INScoreObject, OColor, OPen } from "./lib/libINScore";
 
-///<reference path="JSSVGBase.ts"/>
-///<reference path="guidoengine.ts"/>
-///<reference path="navigator.ts"/>
+export class JSGMNView extends JSSvgBase {
 
-class JSGMNView extends JSSvgBase {
-
-	private fGuido: GuidoEngine;
-	private fAR: ARHandler = null;
-	private fGR: GRHandler = null;
+	private fGuido: GuidoEngine | null;
+	private fAR: ARHandler | null = null;
+	private fGR: GRHandler | null = null;
 	private fPage = 0;
 	private fScalingFactor = 2.3;
-	private fViewBox : { width: number, height: number };
-	protected fParser: GuidoParser;
+	private fViewBox : { width: number, height: number } = { width: 0, height: 0 };
+	protected fParser: GuidoParser | null = null;
 
 	private scanMap (name: string)	: { name: string, index: number } { 
 		let n = name.match(/([a-z]+)(\d+)/);
@@ -26,7 +29,7 @@ class JSGMNView extends JSSvgBase {
 	}
 	private viewBox ()	: { width: number, height: number } { return this.fViewBox; }
 
-	constructor(parent: JSObjectView, guido: GuidoEngine) {
+	constructor(parent: JSObjectView, guido: GuidoEngine | null) {
 		super(parent);
 		this.fGuido = guido;
 		this.fGR = null;
@@ -41,29 +44,33 @@ class JSGMNView extends JSSvgBase {
 	getSVGTarget() : SVGShape   { return this.fSVG; }
 	toString() : string		    { return "JSGMNView"; }
 	updateSVGDimensions(w: number, h: number) : void { }
-	guido() : GuidoEngine		{ return this.fGuido; }
+	guido() : GuidoEngine | null { return this.fGuido; }
 	delete() : void	{ 
-		if (this.fGR) {
-			this.fGuido.freeGR(this.fGR);
-			this.fGuido.freeAR(this.fAR);
-			this.fGR = null;
-			this.fAR = null;
+		if (this.fGuido) {
+			if (this.fGR) this.fGuido.freeGR(this.fGR);
+			if (this.fAR) this.fGuido.freeAR(this.fAR);
+			if (this.fParser) this.fGuido.closeParser(this.fParser);
 		}
-		this.fGuido.closeParser (this.fParser);
+		this.fGR = null;
+		this.fAR = null;
 		this.fParser = null;
 		super.delete();
 	}
 
 	updatePenControl(pen: OPen) : void {	this.updateRegularPen (pen); }
 
-	parse(gmn: string)	: ARHandler { return this.fGuido.string2AR (this.fParser, gmn); }
-	string2Ar (obj: INScoreObject, gmn: string) : ARHandler { return this.parse (gmn); }
+	parse(gmn: string) : ARHandler | null {
+		if (!this.fGuido || !this.fParser) return null;
+		return this.fGuido.string2AR(this.fParser, gmn);
+	}
+	string2Ar (obj: INScoreObject, gmn: string) : ARHandler | null { return this.parse (gmn); }
 
 	// scaled to get a size similar to native app
-	parentScale() : number { return this.getParent().parentScale() * this.fScalingFactor; }
+	parentScale() : number { return super.parentScale() * this.fScalingFactor; }
 	getScale(scale: number) : number {  return scale; }
 
 	gmn2svg(obj: INScoreObject, gmn: string, page: number)	: boolean {
+		if (!this.fGuido) return false;
 		let ret = false;
 		let ar = this.string2Ar (obj, gmn);
 		if (ar) {
@@ -72,13 +79,13 @@ class JSGMNView extends JSSvgBase {
 			this.fSVG.innerHTML = svg;
 			
 			let innerSvg = this.fSVG.getElementsByTagName('svg');
-			this.fViewBox = this.scanViewBox (innerSvg[0].getAttribute('viewBox'));	
+			this.fViewBox = this.scanViewBox (innerSvg[0].getAttribute('viewBox') || "");
 			this.updateObjectSize (obj, this.fViewBox.width, this.fViewBox.height);
 			obj.updateTime2TimeMap (this.fGuido.getTimeMap (ar));
 
 			if (this.fGR) {
 				this.fGuido.freeGR(this.fGR);
-				this.fGuido.freeAR(this.fAR);
+				if (this.fAR) this.fGuido.freeAR(this.fAR);
 			}
 			this.fGR = gr;
 			this.fAR = ar;
@@ -105,6 +112,24 @@ class JSGMNView extends JSSvgBase {
 		return this.gmn2svg (obj, guido.code, guido.page);
     }
 	
+	static getPageCount(id: number) : number {
+		let view = <JSGMNView | null>JSObjectView.getObjectView(id);
+		if (!view || !view.fGuido || !view.fGR) return 0;
+		return view.fGuido.getPageCount(view.fGR);
+	}
+
+	static getSystemCount(id: number, page: number) : number {
+		let view = <JSGMNView | null>JSObjectView.getObjectView(id);
+		if (!view || !view.fGuido || !view.fGR) return 0;
+		return view.fGuido.getSystemCount(view.fGR, page);
+	}
+
+	static getPageDate(id: number, page: number) : GuidoDate {
+		let view = <JSGMNView | null>JSObjectView.getObjectView(id);
+		if (!view || !view.fGuido || !view.fGR) return { num: -1, denom: 1 };
+		return view.fGuido.getPageDate(view.fGR, page);
+	}
+
 	// this method is called by the model to update the map synchronously
 	static getMapping (mapname: string, id: number, oid: number) : void {
 		let view = <JSGMNView>JSObjectView.getObjectView(id);
@@ -114,12 +139,14 @@ class JSGMNView extends JSSvgBase {
 			let w = vb.width; 
 			let h = vb.height;
 			let map = view.getMap (mapname, w, h);
+			if (map === null) return;
 			obj.updateGraphic2TimeMap (mapname, map, w, h);
 		}
 	}
 
-	getMap (mapname: string, width: number, height: number) : string
+	getMap (mapname: string, width: number, height: number) : string | null
 	{
+		if (!this.fGuido || !this.fGR) return null;
 		if (mapname == "page")
 			return this.fGuido.getPageMap(this.fGR, this.fPage, width, height );
 		if (mapname == "system")
@@ -153,3 +180,11 @@ class JSGMNView extends JSSvgBase {
 		return <SVGSVGElement>g[0];
 	}
 }
+
+type JSGMNViewClass = typeof JSGMNView;
+
+declare global {
+    var JSGMNView: JSGMNViewClass;
+}
+
+globalThis.JSGMNView = JSGMNView;

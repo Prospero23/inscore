@@ -1,11 +1,11 @@
+import { OAudioNodeInfos } from "./lib/libINScore"
+import { AudioObject } from "./AudioObject";
+import { AudioCnxVector } from "./lib/libINScore";
+import { JSObjectView } from "./JSObjectView";
 
-///<reference path="lib/libINScore.d.ts"/>
-///<reference path="JSObjectView.ts"/>
-///<reference path="AudioObject.ts"/>
+export interface cnxFunction { (src: AudioObject, dest: AudioObject, srcchan: number, destchan: number) : boolean };
 
-interface cnxFunction { (src: AudioObject, dest: AudioObject, srcchan: number, destchan: number) : boolean };
-
-class AudioTools {
+export class AudioTools {
 
     static updateConnections(cnx: OAudioNodeInfos, view: JSObjectView) {
         AudioTools.doit(view, cnx.connect, AudioTools.connectSrcDest, "connect");
@@ -14,17 +14,27 @@ class AudioTools {
 
     static connectSrcDest(src: AudioObject, dest: AudioObject, srcchan: number, destchan: number) : boolean {
         if (src && dest) {
+            const srcNode = src.getAudioNode();
+            const destNode = dest.getAudioNode();
+            if (!srcNode || !destNode) return false;
             try {
                 if (srcchan || destchan) {
                     let splitter = src.getSplitter();
                     let merger   = dest.getMerger();
                     if (srcchan) {
-                        if (destchan) splitter.connect(merger, srcchan - 1, destchan - 1);
-                        else splitter.connect(dest.getAudioNode(), srcchan - 1);
+                        if (!splitter) return false;
+                        if (destchan) {
+                            if (!merger) return false;
+                            splitter.connect(merger, srcchan - 1, destchan - 1);
+                        }
+                        else splitter.connect(destNode, srcchan - 1);
                     }
-                    else src.getAudioNode().connect(merger, srcchan, destchan - 1);
+                    else {
+                        if (!merger) return false;
+                        srcNode.connect(merger, srcchan, destchan - 1);
+                    }
                 }
-                else src.getAudioNode().connect(dest.getAudioNode());
+                else srcNode.connect(destNode);
             }
             catch (error) {
                 console.log ("Exception while calling AudioNode connect: " + error);
@@ -37,17 +47,27 @@ class AudioTools {
     
     static disconnectSrcDest(src: AudioObject, dest: AudioObject, srcchan: number, destchan: number) : boolean {
         if (src && dest) {
+            const srcNode = src.getAudioNode();
+            const destNode = dest.getAudioNode();
+            if (!srcNode || !destNode) return false;
             try {
                 if (srcchan || destchan) {
                     let splitter = src.getSplitter();
                     let merger   = dest.getMerger();
                     if (srcchan) {
-                        if (destchan) splitter.disconnect(merger, srcchan-1, destchan-1);
-                        else splitter.disconnect(dest.getAudioNode(), srcchan-1);
+                        if (!splitter) return false;
+                        if (destchan) {
+                            if (!merger) return false;
+                            splitter.disconnect(merger, srcchan-1, destchan-1);
+                        }
+                        else splitter.disconnect(destNode, srcchan-1);
                     }
-                    else src.getAudioNode().disconnect(merger, srcchan, destchan-1);
+                    else {
+                        if (!merger) return false;
+                        srcNode.disconnect(merger, srcchan, destchan-1);
+                    }
                 }
-                else src.getAudioNode().disconnect(dest.getAudioNode());
+                else srcNode.disconnect(destNode);
             }
             catch (error) {
                 console.log ("Exception while calling AudioNode disconnect (", srcchan, destchan, ")", error);

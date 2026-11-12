@@ -1,7 +1,8 @@
+import { JSAutoSize } from "./JSAutoSize";
+import type { JSObjectView, Point } from "./JSObjectView";
+import type { INScoreObject, OShadow } from "./lib/libINScore";
 
-///<reference path="JSAutoSize.ts"/>
-
-class JSImageView extends JSAutoSize 
+export class JSImageView extends JSAutoSize
 {
     fImage: HTMLImageElement;
 

@@ -1,8 +1,8 @@
+import { JSHtmlView } from "./JSHtmlView";
+import { TFileLoader } from "./TFileLoader";
+import type { INScoreObject } from "./lib/libINScore";
 
-///<reference path="JSHtmlView.ts"/>
-///<reference path="TFileLoader.ts"/>
-
-class JSHtmlfView extends JSHtmlView {
+export class JSHtmlfView extends JSHtmlView {
 
 	toString() : string					{ return "JSHtmlfView"; }
 

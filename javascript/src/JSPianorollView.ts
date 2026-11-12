@@ -1,9 +1,11 @@
+import { JSGMNView } from "./JSGMNView";
+import type { JSObjectView } from "./JSObjectView";
+import { PianoRollType, type GuidoEngine } from "./guidoengine";
+import type { INScoreObject, OPianorollInfos } from "./lib/libINScore";
 
-///<reference path="JSGMNView.ts"/>
+export class JSPianoRollView extends JSGMNView {
 
-class JSPianoRollView extends JSGMNView {
-
-	constructor(parent: JSObjectView, guido: GuidoEngine) {
+	constructor(parent: JSObjectView, guido: GuidoEngine | null) {
 		super(parent, guido);
 	}
 	clone (parent: JSObjectView) : JSObjectView { return new JSPianoRollView(parent, this.guido()); }
@@ -11,10 +13,15 @@ class JSPianoRollView extends JSGMNView {
 	toString() : string		    { return "JSPianoRollView"; }
 
 	proll2svg(obj: INScoreObject, proll: OPianorollInfos, gmn: string)	: boolean {
+		let guido = this.guido();
+		if (!guido) return false;
 		let ar = this.parse (gmn); //(this.getGmn(proll));
 		if (ar) {
-			let guido = this.guido();
 			let pr = guido.ar2PianoRoll (PianoRollType.kSimplePianoRoll, ar);
+			if (!pr) {
+				guido.freeAR(ar);
+				return false;
+			}
 			guido.prEnableKeyboard (pr, proll.keyboard);
 			guido.prEnableMeasureBars (pr, proll.bars);
 			guido.prEnableAutoVoicesColoration (pr, proll.autovoicecolor);
@@ -23,10 +30,10 @@ class JSPianoRollView extends JSGMNView {
 							endDate: {num: l.end.num, denom: l.end.denum }, 
 							lowPitch: l.lowpitch, highPitch: l.highpitch };
 			guido.prSetLimits( pr, limits );
-			let svg = this.guido().proll2svg (pr, 400, 200);
+			let svg = guido.proll2svg (pr, 400, 200);
 			this.fSVG.innerHTML = svg;
-			this.guido().destroyPianoRoll(pr);
-			this.guido().freeAR(ar);
+			guido.destroyPianoRoll(pr);
+			guido.freeAR(ar);
 			obj.ready();
 			return true;
 		}

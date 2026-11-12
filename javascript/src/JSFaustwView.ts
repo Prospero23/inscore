@@ -1,13 +1,16 @@
+import { JSFaustView } from "./JSFaustView";
+import { AIOScanner } from "./AIOScanner";
+import type { JSObjectView } from "./JSObjectView";
+import type { faust } from "./faust";
+import type { INScoreObject } from "./lib/libINScore";
 
-///<reference path="JSFaustView.ts"/>
-
-interface FaustSVG extends SVGSVGElement {
+export interface FaustSVG extends SVGSVGElement {
     diagram: Faust.SVGDiagrams;
 }
 
-class JSFaustwView extends JSFaustView {
+export class JSFaustwView extends JSFaustView {
     
-    constructor(parent: JSObjectView, compiler: faust) {
+    constructor(parent: JSObjectView, compiler: faust | null) {
         super(parent, compiler);
     }
 

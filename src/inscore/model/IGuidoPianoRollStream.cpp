@@ -49,18 +49,17 @@ void IGuidoPianoRollStream::accept (Updater* u)
 //--------------------------------------------------------------------------
 const string IGuidoPianoRollStream::getCleanGMN() const
 {
-	const char* str = GuidoStream2GuidoString(fGuidoStream);
-	const string r(str);
-	GuidoFreeStreamString(str);
-	return r;
+	return IGuidoStream::getCleanGMN();
 }
 
 //--------------------------------------------------------------------------
 MsgHandler::msgStatus IGuidoPianoRollStream::set (const IMessage* msg )
 {
     // Delete handler if objet pianorollstream object already exist
+#ifndef EMCC
     GuidoDestroyPianoRoll(fPianoRoll);
     GuidoFreeAR(fArHandler);
+#endif
     fPianoRoll = 0;
     fArHandler = 0;
 

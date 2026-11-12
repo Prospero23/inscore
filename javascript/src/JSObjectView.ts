@@ -1,11 +1,10 @@
+import type { INScoreObject, OColor, OEffect, OEvents, OPen, OPosition, OShadow } from "./lib/libINScore";
+import type { AudioObject } from "./AudioObject";
+import { Effect, INScore } from "./inscore";
+import type { GraphicSyncManager } from "./interfaces";
 
-///<reference path="lib/libINScore.d.ts"/>
-///<reference path="AudioObject.ts"/>
-///<reference path="inscore.ts"/>
-///<reference path="interfaces.ts"/>
 
-
-interface Point {
+export interface Point {
 	x: number;
 	y: number;
 }
@@ -19,18 +18,18 @@ const kMouseMoveID  	= 5;
 const kMouseDClickID	= 6;
 
 //----------------------------------------------------------------------------
-abstract class JSObjectView {
+export abstract class JSObjectView {
 
 	private static fGlobalID = 0;
-	private static fObjects = new Array<JSObjectView>();
+	private static fObjects = new Array<JSObjectView | null>();
 	private fID = 0;
 	private fElement : HTMLElement;
-	private fParent  : JSObjectView;
-	private fSyncManager : GraphicSyncManager;
-	private fIObject : number;			// a pointer to the IObject (used with sync management)
+	private fParent  : JSObjectView | null;
+	private fSyncManager : GraphicSyncManager | null;
+	private fIObject : number | null;			// a pointer to the IObject (used with sync management)
 	private fOrigin : Point;
 
-    constructor(elt: HTMLElement, parent: JSObjectView, absolute=true) { 
+    constructor(elt: HTMLElement, parent: JSObjectView | null, absolute=true) {
 		this.fID = ++JSObjectView.fGlobalID; 		// create a unique identifier
     	JSObjectView.fObjects[this.fID] = this; 	// store the div using its id
     	this.fParent = parent; 
@@ -42,30 +41,32 @@ abstract class JSObjectView {
 		if (absolute) elt.style.position = "absolute";
 	}
 
-	abstract clone (parent: JSObjectView) : JSObjectView;
-	static getObjectView(id: number) : JSObjectView		{ return JSObjectView.fObjects[id]; }
+	abstract clone (parent: JSObjectView) : JSObjectView | null;
+	static getObjectView(id: number) : JSObjectView | null { return JSObjectView.fObjects[id] || null; }
 
 	setSyncManager(sync: GraphicSyncManager) : void { this.fSyncManager = sync; }
 	setIObject(id: number) : void   { this.fIObject = id; }
-	getIObject() : number   		{ return this.fIObject; }
+	getIObject() : number | null { return this.fIObject; }
 	toString() : string				{ return "JSObjectView"; }
 	getId() : number	 			{ return this.fID; }
 	getElement() : HTMLElement		{ return this.fElement; }
-	getParent() : JSObjectView		{ return this.fParent; }
+	getParent() : JSObjectView | null { return this.fParent; }
 	delete() : void { 
 		if (this.fSyncManager) this.fSyncManager.clean();
 		let parent = this.getElement().parentNode; // parent could be deleted
 		if (parent) parent.removeChild (this.getElement());
 		JSObjectView.fObjects[this.fID] = null; 
 	}
-	toAudioObject() : AudioObject { return null; }
+	toAudioObject() : AudioObject | null { return null; }
 
 	parentWidth() : number			{ 
 		let elt = this.getElement().parentElement;
+		if (!elt) return 0;
 		return Math.min(elt.clientWidth, elt.clientHeight); 
 	}
 	parentHeight() : number			{ 
 		let elt = this.getElement().parentElement;
+		if (!elt) return 0;
 		return Math.min(elt.clientWidth, elt.clientHeight); 
 	}
 	
@@ -87,7 +88,10 @@ abstract class JSObjectView {
 			return Math.min(div.clientWidth, div.offsetHeight) / Math.min(div.parentElement.offsetWidth, div.parentElement.offsetHeight);
 		return 1;
 	}
-	getSyncRatio()	: number {  return this.getParent().parentSyncRatio(); }
+	getSyncRatio()	: number {
+		let parent = this.getParent();
+		return parent ? parent.parentSyncRatio() : 1;
+	}
 
 
 	//---------------------------------------------------------------------
@@ -149,7 +153,8 @@ abstract class JSObjectView {
 	}
 
 	getPos(pos: OPosition) : Point {
-		let ppos = this.getParent().getOrigin();
+		let parent = this.getParent();
+		let ppos = parent ? parent.getOrigin() : this.getOrigin();
 		let scale = this.getScale(pos.scale);
 		let div = this.getElement();
 		let x = ppos.x + this.relative2SceneWidth (pos.x) - (div.offsetWidth * (1 + pos.xorigin * scale) / 2 );
@@ -200,7 +205,7 @@ abstract class JSObjectView {
 		if (x < 0) x = -x;		// make sure the position is the relative distance to the origin
 		let y = 0.5 + (0.5 * this.fOrigin.y) - rely;
 		if (y < 0) y = -y;		// make sure the position is the relative distance to the origin
-		let pdiv = div.parentElement;
+		let pdiv = div.parentElement || div;
 		let r = pdiv.getBoundingClientRect();
 		let sx = ((event.clientX - r.left) / pdiv.clientWidth * 2) -1 ;
 		let sy = ((event.clientY - r.top) / pdiv.clientHeight * 2) -1 ;
@@ -220,7 +225,7 @@ abstract class JSObjectView {
 
 		if (!this.accept(event, id)) return;
 		if ((id == kMouseMoveID) && (event.buttons != 1)) return;	// ignore move event without mouse button
-		let mevent = null;
+		let mevent: string;
 		switch (id) {
 			case kMouseEnterID:	 mevent = "mouseEnter"; break;
 			case kMouseLeaveID:  mevent = "mouseLeave"; break;
@@ -231,6 +236,7 @@ abstract class JSObjectView {
 			default: return;  // unexpected event
 		}
 
+		if (!inscore) return;
 		let msg = inscore.newMessageM ("event");
 		inscore.msgAddStr (msg, mevent);
 		let p = this.getPoints (event);
@@ -390,5 +396,13 @@ abstract class JSObjectView {
     	}
     }
 
-    static getVObject (id : number)		: JSObjectView	{ return JSObjectView.fObjects[id]; }
+    static getVObject (id : number) : JSObjectView | null { return JSObjectView.getObjectView(id); }
 }
+
+type JSObjectViewClass = typeof JSObjectView;
+
+declare global {
+    var JSObjectView: JSObjectViewClass;
+}
+
+globalThis.JSObjectView = JSObjectView;

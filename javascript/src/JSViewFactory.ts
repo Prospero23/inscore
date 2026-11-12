@@ -1,48 +1,50 @@
-
-///<reference path="JSObjectView.ts"/>
-///<reference path="JSTextView.ts"/>
-///<reference path="JSTextfView.ts"/>
-///<reference path="JSHtmlfView.ts"/>
-///<reference path="JSSceneView.ts"/>
-///<reference path="JSRectView.ts"/>
-///<reference path="JSEllipseView.ts"/>
-///<reference path="JSLineView.ts"/>
-///<reference path="JSImageView.ts"/>
-///<reference path="JSArcView.ts"/>
-///<reference path="JSPolygonView.ts"/>
-///<reference path="JSCurveView.ts"/>
-///<reference path="JSGMNView.ts"/>
-///<reference path="JSGMNfView.ts"/>
-///<reference path="JSGMNStreamView.ts"/>
-///<reference path="JSXMLView.ts"/>
-///<reference path="JSXMLfView.ts"/>
-///<reference path="JSSVGView.ts"/>
-///<reference path="JSPianorollView.ts"/>
-///<reference path="JSPianorollfView.ts"/>
-///<reference path="JSLayerView.ts"/>
-///<reference path="JSSVGfView.ts"/>
-///<reference path="JSVideoView.ts"/>
-///<reference path="JSAudioView.ts"/>
-///<reference path="JSAudioioView.ts"/>
-///<reference path="JSFaustView.ts"/>
-///<reference path="JSFaustfView.ts"/>
-///<reference path="JSFaustwView.ts"/>
-///<reference path="TSyncManager.ts"/>
-///<reference path="libraries.ts"/>
-
+import { inscorelibs } from "./libraries";
+import { JSObjectView } from "./JSObjectView";
+import { JSTextView } from "./JSTextView";
+import { JSTextfView } from "./JSTextfView";
+import { JSHtmlView } from "./JSHtmlView";
+import { JSHtmlfView } from "./JSHtmlfView";
+import { JSSceneView } from "./JSSceneView";
+import { JSRectView } from "./JSRectView";
+import { JSEllipseView } from "./JSEllipseView";
+import { JSLineView } from "./JSLineView";
+import { JSImageView } from "./JSImageView";
+import { JSArcView } from "./JSArcView";
+import { JSPolygonView } from "./JSPolygonView";
+import { JSCurveView } from "./JSCurveView";
+import { JSGMNView } from "./JSGMNView";
+import { JSGMNfView } from "./JSGMNfView";
+import { JSGMNStreamView } from "./JSGMNStreamView";
+import { JSXMLView } from "./JSXMLView";
+import { JSXMLfView } from "./JSXMLfView";
+import { JSSVGView } from "./JSSVGView";
+import { JSPianoRollView } from "./JSPianorollView";
+import { JSPianoRollfView } from "./JSPianorollfView";
+import { JSLayerView } from "./JSLayerView";
+import { JSSVGfView } from "./JSSVGfView";
+import { JSVideoView } from "./JSVideoView";
+import { JSAudioView } from "./JSAudioView";
+import { JSAudioioView } from "./JSAudioioView";
+import { JSFaustView } from "./JSFaustView";
+import { JSFaustfView } from "./JSFaustfView";
+import { JSFaustwView } from "./JSFaustwView";
+import { TSyncManager } from "./TSyncManager";
 
 //----------------------------------------------------------------------------
-class JSViewFactory {
+export class JSViewFactory {
 
 	static createScene (id: string, objid: number) : number { 
-		const scene = new JSSceneView(id, objid);
+		const div = document.getElementById(id);
+		if (!div) return 0;
+		const scene = new JSSceneView(div, objid);
 		return scene.getId();
 	}
 
 
 	static create (parentid: number, type: string, objid: number) : number	{ 
 		let parent = JSObjectView.getVObject(parentid);
-		let view = null;
+		if (!parent) return 0;
+		let view: JSObjectView | null = null;
 		switch (type) {
 			case "arc": 	  view = new JSArcView(parent); break;
 			case "curve":     view = new JSCurveView(parent); break;
@@ -96,3 +98,11 @@ class JSViewFactory {
 }
 
 var inscorefactory = new JSViewFactory();
+
+type JSViewFactoryClass = typeof JSViewFactory;
+
+declare global {
+    var JSViewFactory: JSViewFactoryClass;
+}
+
+globalThis.JSViewFactory = JSViewFactory;

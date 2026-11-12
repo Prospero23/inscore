@@ -1,7 +1,7 @@
 
-///<reference path="JSObjectView.ts"/>
-
-abstract class JSAutoSize extends JSObjectView 
+import { INScoreObject } from "./lib/libINScore";
+import { JSObjectView, type Point } from "./JSObjectView";
+export abstract class JSAutoSize extends JSObjectView
 {
     private fSetSize = true;    // a flag to control automatic size setting
 

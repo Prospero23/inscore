@@ -29,16 +29,11 @@
 #include "GUIDOParse.h"
 #include "VObjectView.h"
 
-using namespace std;
-
 #ifdef EMCC
-
-#define GuidoFreeStreamString(type)
-#define GuidoCloseStream(stream)
-#define GuidoResetStream(stream) 	fReset=true
-#define GuidoOpenStream()	0
-
+#include "GuidoStream.h"
 #endif
+
+using namespace std;
 
 
 namespace inscore
@@ -51,7 +46,11 @@ IGuidoStream::IGuidoStream( const std::string& name, IObject * parent )
 	: IGuidoCode (name, parent)
 {
 	fTypeString = kGuidoStreamType;
+#ifdef EMCC
+	fGuidoStream = new GuidoStream();
+#else
     fGuidoStream = GuidoOpenStream();
+#endif
     
 	fMsgHandlerMap[kclear_SetMethod] = TMethodMsgHandler<IGuidoStream, void (IGuidoStream::*)()>::create(this, &IGuidoStream::clear);
     fMsgHandlerMap[kwrite_SetMethod] = TMethodMsgHandler<IGuidoStream>::create(this, &IGuidoStream::write);
@@ -59,16 +58,24 @@ IGuidoStream::IGuidoStream( const std::string& name, IObject * parent )
 
 IGuidoStream::~IGuidoStream()
 {
+#ifdef EMCC
+	delete fGuidoStream;
+#else
 	GuidoCloseStream(fGuidoStream);
+#endif
 }
 
 //--------------------------------------------------------------------------
 const string IGuidoStream::getCleanGMN() const
 {
+#ifdef EMCC
+	return fGuidoStream->getGuidoCode();
+#else
 	const char* str = GuidoStream2GuidoString(fGuidoStream);
 	string r(str);
 	GuidoFreeStreamString(str);
 	return r;
+#endif
 }
 
 //--------------------------------------------------------------------------
@@ -92,7 +99,13 @@ MsgHandler::msgStatus IGuidoStream::set (const IMessage* msg )
     string t;
 	if ((msg->size() == 2) && msg->param(1, t)) {
 		if(t!=fGMN){
+		#ifdef EMCC
+			fGuidoStream->ReinitStream();
+			fStream.str("");
+			fReset = true;
+		#else
 			GuidoResetStream(fGuidoStream);
+		#endif
 			writeStream(t);
 			status = MsgHandler::kProcessed;
 			resetWidth();
@@ -111,7 +124,13 @@ void IGuidoStream::clear()
 	if(fGMN=="") return;
 #endif
 
+#ifdef EMCC
+	fGuidoStream->ReinitStream();
+	fStream.str("");
+	fReset = true;
+#else
 	GuidoResetStream(fGuidoStream);
+#endif
 	setGMN("");
 	newData(true);
 	resetWidth();
@@ -140,6 +159,8 @@ void IGuidoStream::writeStream (std::string t)
 {
 #ifdef EMCC
 	fStream << t;
+	fGuidoStream->WriteToStream(t.c_str());
+	setGMN(fGuidoStream->getStreamStr());
 #else
 	const char * newchar = t.c_str();
     GuidoWriteStream(fGuidoStream, newchar);

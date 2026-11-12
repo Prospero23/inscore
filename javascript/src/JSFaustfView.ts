@@ -1,9 +1,7 @@
+import { JSFaustView } from "./JSFaustView";
+import { TFileLoader } from "./TFileLoader";
 
-///<reference path="JSFaustView.ts"/>
-///<reference path="TFileLoader.ts"/>
-
-
-class JSFaustfView extends JSFaustView {
+export class JSFaustfView extends JSFaustView {
 
     toString() : string	{ return "JSFaustfView"; }
  

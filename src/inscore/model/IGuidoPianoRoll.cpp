@@ -233,10 +233,12 @@ MsgHandler::msgStatus IGuidoPianoRoll::setRGBColorToVoice(const IMessage* msg)
 	if(size == 0) {
 		// reset color of all voice to black
 		fVoicesColor.clear();
+#ifndef EMCC
 		const int voices = GuidoCountVoices(fArHandler);
 		for(int i = 1; i <= voices; i++) {
 			GuidoPianoRollRemoveColorToVoice(fPianoRoll, i);
 		}
+#endif
 		return MsgHandler::kProcessed;
 	}
 

@@ -6,6 +6,7 @@
 
 QMAKE ?= qmake
 CMAKE ?= cmake
+EMCMAKE ?= emcmake
 MAKE  ?= make
 RANGE ?= 
 
@@ -94,8 +95,8 @@ wasm: $(WASMDIR) $(WASMDIR)/Makefile
 $(WASMDIR):
 	mkdir $(WASMDIR)
 
-$(WASMDIR)/Makefile : CMakeLists.txt modules/WASMConfig.cmake
-	cd $(WASMDIR) && $(CMAKE) .. -DWASM=on
+$(WASMDIR)/Makefile : Makefile CMakeLists.txt modules/WASMConfig.cmake
+	cd $(WASMDIR) && $(EMCMAKE) $(CMAKE) .. -DWASM=on
 
 #===============================================================
 # building for iOS

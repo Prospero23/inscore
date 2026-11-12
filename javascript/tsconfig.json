@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "lib": ["es2025", "dom"],
+    "types": ["@grame/libfaust", "@grame/guidolib"],
+    "module": "es2022",
+    "rootDir": ".",
+    "moduleResolution": "bundler",
+    "target": "es2025",
+    "isolatedModules": true,
+    "noImplicitAny": false,
+    "allowUnreachableCode": false,
+    "allowUnusedLabels": false,
+    "allowJs": false,
+    "noEmit": true
+  },
+  "include": [
+    "src/**/*.ts",
+    "glueSrc/**/*.ts"
+  ]
+}

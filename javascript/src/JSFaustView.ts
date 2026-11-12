@@ -1,22 +1,23 @@
+import { JSSvgBase, type SVGShape } from "./JSSVGBase";
+import type { JSObjectView } from "./JSObjectView";
+import type { faust } from "./faust";
+import { AIOScanner } from "./AIOScanner";
+import { AudioTools } from "./AudioTools";
+import { AudioRouting, type AudioObject } from "./AudioObject";
+import { Download } from "./download";
+import type { INScoreObject, OPen } from "./lib/libINScore";
 
-///<reference path="JSSVGBase.ts"/>
-///<reference path="faust.ts"/>
-///<reference path="AIOScanner.ts"/>
-///<reference path="AudioTools.ts"/>
-///<reference path="AudioObject.ts"/>
-///<reference path="download.ts"/>
-
-interface FaustSVG extends SVGSVGElement {
+export interface FaustSVG extends SVGSVGElement {
     diagram: Faust.SVGDiagrams;
 }
 
-class JSFaustView extends JSSvgBase implements AudioObject {
-    protected fFaust : faust;
-    protected fFactory: Faust.Factory = null;
-    protected fEffect: Faust.Factory = null;
-    protected fMixer: WebAssembly.Module = null;
-    protected fAudioNode : Faust.FaustMonoNode | Faust.FaustPolyNode = null;
-    protected fRouter : AudioRouting = null;
+export class JSFaustView extends JSSvgBase implements AudioObject {
+    protected fFaust : faust | null;
+    protected fFactory: Faust.Factory | null = null;
+    protected fEffect: Faust.Factory | null = null;
+    protected fMixer: WebAssembly.Module | null = null;
+    protected fAudioNode : Faust.FaustMonoNode | Faust.FaustPolyNode | null = null;
+    protected fRouter : AudioRouting | null = null;
     protected fVoices = 0;
     protected fCompute = false;
     static fCompilerLock = false;
@@ -24,7 +25,7 @@ class JSFaustView extends JSSvgBase implements AudioObject {
     static readonly kSuccess = 1;
     static readonly kPending = 2;
     
-    constructor(parent: JSObjectView, compiler: faust) {
+    constructor(parent: JSObjectView, compiler: faust | null) {
         super(parent);
         this.fFaust = compiler;
     }
@@ -33,9 +34,9 @@ class JSFaustView extends JSSvgBase implements AudioObject {
     getNumInputs() : number     { return this.fAudioNode ? this.fAudioNode.numberOfInputs : 0; }
     getNumOutputs() : number    { return this.fAudioNode ? this.fAudioNode.numberOfOutputs : 0; }
     getNumChans() : number      { return this.fAudioNode ? this.fAudioNode.getNumOutputs() : 0; }
-    getAudioNode() : AudioNode  { return this.fAudioNode; }
-    getSplitter() : AudioNode   { return this.fRouter.getSplitter(); }
-    getMerger() : AudioNode     { return this.fRouter.getMerger(); }
+    getAudioNode() : AudioNode | null { return this.fAudioNode; }
+    getSplitter() : AudioNode | null  { return this.fRouter?.getSplitter() ?? null; }
+    getMerger() : AudioNode | null    { return this.fRouter?.getMerger() ?? null; }
 
     clone (parent: JSObjectView) : JSObjectView { return new JSFaustView(parent, this.fFaust); }
     toString() : string		                    { return "JSFaustView"; }
@@ -55,6 +56,7 @@ class JSFaustView extends JSSvgBase implements AudioObject {
 	}
 
     error(address: string, msg : string)	: void {
+        if (!inscore) return;
         let imsg = inscore.newMessageM ('set');
         inscore.msgAddStr (imsg, 'txt');
         inscore.msgAddStr (imsg, msg);
@@ -66,19 +68,22 @@ class JSFaustView extends JSSvgBase implements AudioObject {
         let FSVG = this.fSVG as FaustSVG;
         this.fSVG.id = name;
         FSVG.diagram = svg;
-        let code = name + "svg =  function (path) { \
-            let elt= document.getElementById ('" + name + "'); \
-            elt.innerHTML = elt.diagram.getSVG(path); \
-            let p = elt.parentElement; \
-            let bb = elt.getBBox(); \
-            p.style.width = elt.style.width = bb.width; \
-            p.style.height = elt.style.height = bb.height; \
-        }";
-        eval (code);
+        globalThis[name + "svg"] = (path: string) => {
+            FSVG.innerHTML = FSVG.diagram.getSVG(path);
+            let p = FSVG.parentElement;
+            if (!p) return;
+            let bb = FSVG.getBBox();
+            p.style.width = FSVG.style.width = bb.width + "px";
+            p.style.height = FSVG.style.height = bb.height + "px";
+        };
     }
 
     dsp2Svg (code: string, name: string) : { svg: string, error: string|null} { 
-        let svg = Faust.createSVGDiagrams (this.fFaust.lib(), name, code, "");
+        if (!this.fFaust) return {svg: "", error: "Faust engine is not available"};
+        const lib = this.fFaust.lib();
+        if (!lib) return {svg: "", error: "Faust library is not available"};
+
+        let svg = Faust.createSVGDiagrams (lib, name, code, "");
         if (svg.success()) {
             this.makeLinkHandler (name, svg);
             return { svg: svg.getSVG(), error: null };
@@ -102,10 +107,12 @@ class JSFaustView extends JSSvgBase implements AudioObject {
                 let v = val.get(i);
 // console.log ("JSFaustView.updateSpecific setParamValue ", v.address, v.value);
                 this.fAudioNode.setParamValue (v.address, v.value);
-                if (data.autoOff && (v.type == 0) && v.value) {  // schedule the button off value
+                if (data.autoOff && (v.type == 0) && v.value && inscore) {  // schedule the button off value
                     let msg = inscore.newMessage();
                     inscore.msgAddF (msg, 0);
-                    setTimeout(() => { inscore.postMessage (obj.getOSCAddress() + v.address, msg);}, 50);
+                    setTimeout(() => {
+                        if (inscore) inscore.postMessage (obj.getOSCAddress() + v.address, msg);
+                    }, 50);
                 }
             }
             if (this.fVoices) {
@@ -129,6 +136,7 @@ class JSFaustView extends JSSvgBase implements AudioObject {
     }
 
     async makeFactory (name: string, code: string, voices: number) : Promise<boolean> {
+        if (!this.fFaust || !this.fFaust.lib()) return false;
         let compiler = this.fFaust.compiler();
         const args = "-ftz 2";
         if (voices) this.fFactory = await compiler.createPolyDSPFactory (name, code, args);
@@ -138,13 +146,15 @@ class JSFaustView extends JSSvgBase implements AudioObject {
 
     async makeNodeFromFactory (factory: Faust.Factory, name: string, voices: number) 
         : Promise<Faust.FaustMonoNode | Faust.FaustPolyNode | null> {
+        const audioContext = AIOScanner.fAudioContext;
+        if (!audioContext) return null;
         let sp = typeof (window.AudioWorkletNode) == "undefined";
         if (voices) {
             this.fMixer = await Faust.createGenerator().loadDSPMixer("/usr/rsrc/mixer32.wasm");
             if (!this.fMixer) return null;
-            return Faust.createPolyFactory().createNode(AIOScanner.fAudioContext, name, factory, this.fMixer, voices, sp, null, 1024);
+            return Faust.createPolyFactory().createNode(audioContext, name, factory, this.fMixer, voices, sp, undefined, 1024);
         }
-        return Faust.createMonoFactory().createNode (AIOScanner.fAudioContext, name, factory, sp);
+        return Faust.createMonoFactory().createNode (audioContext, name, factory, sp);
     }
 
     downloadWasm (name: string) : number {
@@ -159,7 +169,7 @@ class JSFaustView extends JSSvgBase implements AudioObject {
     }
 
     async makeAudioNode (obj: INScoreObject, name: string, voices: number) : Promise<number> {
-        let node = await this.makeNodeFromFactory (this.fFactory, name, voices);
+        let node = this.fFactory ? await this.makeNodeFromFactory (this.fFactory, name, voices) : null;
         if (this.fAudioNode) this.fAudioNode.disconnect(); 
         this.fAudioNode = node;
         this.fVoices = voices;
@@ -171,7 +181,7 @@ class JSFaustView extends JSSvgBase implements AudioObject {
         }
 
  //console.log(this.toString(), "channels:", node.channelCount, this.getNumChans());
-        this.fRouter = new AudioRouting (this.fAudioNode, this.getNumChans(), this.toString());
+        this.fRouter = new AudioRouting (node, this.getNumChans(), this.toString());
         obj.setAudioInOut (node.numberOfInputs ? node.channelCount : 0, node.numberOfOutputs ? node.channelCount : 0);
         let ui = node.getDescriptors();
         ui.forEach ( (elt) => { 
@@ -202,7 +212,10 @@ class JSFaustView extends JSSvgBase implements AudioObject {
         JSFaustView.fCompilerLock = true;
         const name = obj.getID();
         let done = await this.makeFactory (name, code, voices);
-        if (!done) return JSFaustView.kFailed;
+        if (!done) {
+            JSFaustView.fCompilerLock = false;
+            return JSFaustView.kFailed;
+        }
         let result = await this.makeAudioNode (obj, name, voices);
         JSFaustView.fCompilerLock = false;
         setTimeout ( () => { obj.event ("ready") }, 10);

@@ -1,17 +1,15 @@
-
-///<reference path="lib/libINScore.d.ts"/>
-///<reference path="inscore.ts"/>
-
-class TJavascript {
+export class TJavascript {
 
 	static run (script: string ) : number {
 	try {
 		let out = window.eval (script);
 		if (out) {
 			if (typeof out === 'string') {
+				if (inscore === null) return 0;
 				inscore.loadInscore (out);
 			}
 			else if (Array.isArray(out)) {
+				if (inscore === null) return 0;
 				let outsum = "";
 				out.forEach ( (value) => outsum += value);
 				inscore.loadInscore (outsum);
@@ -29,3 +27,11 @@ class TJavascript {
 	}
 	}
 }
+
+type TJavascriptClass = typeof TJavascript;
+
+declare global {
+    var TJavascript: TJavascriptClass;
+}
+
+globalThis.TJavascript = TJavascript;

@@ -1,18 +1,17 @@
+declare global {
+    var FaustModule: any;
 
-///<reference types="@grame/libfaust"/>
-
-declare var FaustModule : any;
-
-interface Window {
-	webkitAudioContext ?: typeof AudioContext;
+    interface Window {
+        webkitAudioContext?: typeof AudioContext;
+    }
 }
 
 //----------------------------------------------------------------------------
 // the faust interface
 //----------------------------------------------------------------------------
-class faust {
+export class faust {
 	private fModule: Faust.FaustModule;
-	private fLib: Faust.LibFaust;
+	private fLib!: Faust.LibFaust | null;
 
     async initialise():Promise<any> { 
         return new Promise( (success: any, failure: any) => {
@@ -24,8 +23,8 @@ class faust {
 		});
 	}
 	
-	version () : string			{ return this.fLib.version(); }
+	version () : string			{ return this.fLib!.version(); }
 	module () 					{ return this.fModule; }
 	lib () 						{ return this.fLib; }
-	compiler() 					{ return Faust.createCompiler (this.fLib); }
+	compiler() 					{ return Faust.createCompiler (this.fLib!); }
 }

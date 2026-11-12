@@ -1,8 +1,7 @@
 
+export class TFileLoader {
 
-class TFileLoader {
-
-	private static getMusicXML(element : any) : string	{ 
+	private static getMusicXML(element : any) : string | null	{
 		if (element.nodeName == "score-partwise") {
 			let content = '<!DOCTYPE score-partwise PUBLIC "-//Recordare//DTD MusicXML 3.1 Partwise//EN" "http://www.musicxml.org/dtds/partwise.dtd">\n';
 			let version = element.getAttributeNode('version');
@@ -15,11 +14,11 @@ class TFileLoader {
 		return null;
 	}
 
-	private static getContent(obj: HTMLObjectElement) : string	{ 
+	private static getContent(obj: HTMLObjectElement) : string | null	{
 		let doc = obj.contentDocument;
 		if (! doc) return null;
 		
-		let content = "";
+		let content : string | null = "";
 		let element = doc.documentElement;
 		switch (doc.contentType) {
 			case "text/plain": 		content = element.innerText; break;
@@ -30,7 +29,7 @@ class TFileLoader {
 				console.log ("Unsupported content type " + doc.contentType);
 				content = null;
 		}
-		obj.parentElement.removeChild (obj);
+		obj.parentElement?.removeChild (obj);
 		return content;
 	}
 

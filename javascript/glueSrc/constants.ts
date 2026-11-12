@@ -1,31 +1,31 @@
 
 // object types
 
-const kArcType              : string    = "arc";
-const kCurveType            : string	= "curve";
-const kEllipseType          : string	= "ellipse";
-const kGuidoCodeType        : string	= "gmn";
-const kGuidoPianoRollType   : string	= "pianoroll";
-const kFaustType            : string	= "faust";
-const kFaustfType           : string	= "faustf";
-const kHtmlType             : string	= "html";
-const kImgType              : string	= "img";
-const kLineType             : string	= "line";
-const kPolygonType          : string	= "polygon";
-const kRectType             : string	= "rect";
-const kSvgfType             : string    = "svgf";
-const kSvgType              : string	= "svg";
-const kSyncType             : string	= "sync";
-const kTextfType            : string	= "txtf";
-const kTextType             : string	= "txt";
-const kMusicxmlType         : string	= "musicxml";
-const kVideoType            : string	= "video";
-const kVerovioType        	: string	= "verovio";
-const kVeroviofType        	: string	= "veroviof";
-const kWebSocketType        : string	= "websocket";
+export const kArcType              : string    = "arc";
+export const kCurveType            : string	= "curve";
+export const kEllipseType          : string	= "ellipse";
+export const kGuidoCodeType        : string	= "gmn";
+export const kGuidoPianoRollType   : string	= "pianoroll";
+export const kFaustType            : string	= "faust";
+export const kFaustfType           : string	= "faustf";
+export const kHtmlType             : string	= "html";
+export const kImgType              : string	= "img";
+export const kLineType             : string	= "line";
+export const kPolygonType          : string	= "polygon";
+export const kRectType             : string	= "rect";
+export const kSvgfType             : string    = "svgf";
+export const kSvgType              : string	= "svg";
+export const kSyncType             : string	= "sync";
+export const kTextfType            : string	= "txtf";
+export const kTextType             : string	= "txt";
+export const kMusicxmlType         : string	= "musicxml";
+export const kVideoType            : string	= "video";
+export const kVerovioType        	: string	= "verovio";
+export const kVeroviofType        	: string	= "veroviof";
+export const kWebSocketType        : string	= "websocket";
 
-const kInscore        : string	= "inscore";
-const kInscore2       : string	= "inscore2";
+export const kInscore        : string	= "inscore";
+export const kInscore2       : string	= "inscore2";
 
 // events types
 // const kMouseEnterID 	= 1;

@@ -116,9 +116,17 @@ void IGuidoCode::setPageCount(int count)
 vector<int> IGuidoCode::getSystemsCount() const
 {
 	vector<int> result;
+#ifdef EMCC
+	HTMLObjectView* view = dynamic_cast<HTMLObjectView*>(getView());
+	if (!view) return result;
+#endif
 	int pcount = getPageCount();
 	for (int i=0; i < pcount; i++) {
+	#ifdef EMCC
+		result.push_back(EM_ASM_INT({ return JSGMNView.getSystemCount($0, $1); }, view->getID(), i+1));
+	#else
 		result.push_back( GuidoGetSystemCount (fGRHandler, i+1) );
+	#endif
 	}
 	return result;
 }
@@ -126,7 +134,13 @@ vector<int> IGuidoCode::getSystemsCount() const
 //--------------------------------------------------------------------------
 int IGuidoCode::getPageCount() const
 {
+#ifdef EMCC
+	HTMLObjectView* view = dynamic_cast<HTMLObjectView*>(getView());
+	if (!view) return 0;
+	return EM_ASM_INT({ return JSGMNView.getPageCount($0); }, view->getID());
+#else
 	return GuidoGetPageCount (fGRHandler);
+#endif
 }
 
 //--------------------------------------------------------------------------
@@ -161,11 +175,20 @@ void IGuidoCode::print (ostream& out) const
 //--------------------------------------------------------------------------
 rational IGuidoCode::getPageDate(int pagenum) const
 {
+#ifdef EMCC
+	HTMLObjectView* view = dynamic_cast<HTMLObjectView*>(getView());
+	if (view) {
+		int num = EM_ASM_INT({ return JSGMNView.getPageDate($0, $1).num; }, view->getID(), pagenum);
+		int denom = EM_ASM_INT({ return JSGMNView.getPageDate($0, $1).denom; }, view->getID(), pagenum);
+		return rational(num, denom);
+	}
+#else
 	if (fGRHandler) {
 		GuidoDate date;
 		GuidoGetPageDate( fGRHandler, pagenum, &date);
 		return rational (date.num, date.denom);
 	}
+#endif
 	return rational(-1,1);
 }
 

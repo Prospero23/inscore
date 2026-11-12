@@ -1,8 +1,8 @@
+import { JSXMLView } from "./JSXMLView";
+import { TFileLoader } from "./TFileLoader";
+import type { INScoreObject } from "./lib/libINScore";
 
-///<reference path="JSXMLView.ts"/>
-///<reference path="TFileLoader.ts"/>
-
-class JSXMLfView extends JSXMLView {
+export class JSXMLfView extends JSXMLView {
 
 	toString() : string		    { return "JSXMLfView"; }
 

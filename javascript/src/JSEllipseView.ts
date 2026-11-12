@@ -1,10 +1,12 @@
+import { JSSvgBase } from "./JSSVGBase";
+import { SVGShape } from "./JSSVGBase";
+import { INScoreObject } from "./lib/libINScore";
+import type { JSObjectView } from "./JSObjectView";
 
-///<reference path="JSSVGBase.ts"/>
-
-class JSEllipseView extends JSSvgBase {
+export class JSEllipseView extends JSSvgBase {
     protected fEllipse: SVGEllipseElement;
-    protected fPixWidth: number;		// the element width in pixels
-    protected fPixHeight: number;		// the element height in pixels
+    protected fPixWidth!: number;		// the element width in pixels
+    protected fPixHeight!: number;		// the element height in pixels
     
     constructor(parent: JSObjectView) {
 		super(parent);

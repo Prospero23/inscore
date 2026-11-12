@@ -1,7 +1,8 @@
+import { JSSvgBase, type SVGShape } from "./JSSVGBase";
+import type { JSObjectView } from "./JSObjectView";
+import type { INScoreObject } from "./lib/libINScore";
 
-///<reference path="JSSVGBase.ts"/>
-
-class JSCurveView extends JSSvgBase {
+export class JSCurveView extends JSSvgBase {
     protected fCurve: 	SVGPathElement;
     // protected fStart: 	TPoint;
     // protected fEnd: 	TPoint;

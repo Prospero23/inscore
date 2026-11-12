@@ -1,7 +1,9 @@
-
-///<reference path="JSSVGBase.ts"/>
-
-class JSArcView extends JSSvgBase
+import { INScoreObject } from "./lib/libINScore";
+import { JSSvgBase } from "./JSSVGBase";
+import { JSObjectView } from "./JSObjectView";
+import { Point } from "./JSObjectView";
+import { SVGShape } from "./JSSVGBase";
+export class JSArcView extends JSSvgBase
 {
     protected fArc   : SVGPathElement;
 

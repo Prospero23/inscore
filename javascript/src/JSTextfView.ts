@@ -1,8 +1,8 @@
+import { JSTextView } from "./JSTextView";
+import { TFileLoader } from "./TFileLoader";
+import type { INScoreObject } from "./lib/libINScore";
 
-///<reference path="JSTextView.ts"/>
-///<reference path="TFileLoader.ts"/>
-
-class JSTextfView extends JSTextView {
+export class JSTextfView extends JSTextView {
 
 	toString() : string					{ return "JSTextfView"; }
 

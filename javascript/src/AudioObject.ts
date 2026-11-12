@@ -1,20 +1,17 @@
-
-///<reference path="AIOScanner.ts"/>
-
-interface AudioObject {
+import { AIOScanner } from "./AIOScanner"
+export interface AudioObject {
     getNumInputs() : number
     getNumOutputs() : number
     getNumChans() : number
-    getAudioNode() : AudioNode
-    getSplitter() : AudioNode
-    getMerger() : AudioNode
+    getAudioNode() : AudioNode | null
+    getSplitter() : AudioNode | null
+    getMerger() : AudioNode | null
 }
 
-
-class AudioRouting {
-    protected fSplitter : AudioNode = null;
-    protected fMerger : AudioNode = null;
-    private fAudioNode : AudioNode = null;
+export class AudioRouting {
+    protected fSplitter : AudioNode | null = null;
+    protected fMerger : AudioNode | null = null;
+    private fAudioNode : AudioNode;
     
     // depending on the channels and the number of inputs / outputs
     // encapsulates an audio node in a splitter and a merger 
@@ -23,10 +20,12 @@ class AudioRouting {
         this.fAudioNode = node;
 		if (chans > 1) {
 		    if (node.numberOfOutputs) {
+                if (AIOScanner.fAudioContext === null) return;
                 this.fSplitter  = AIOScanner.fAudioContext.createChannelSplitter (chans);
                 node.connect (this.fSplitter);
             }
 		    if (node.numberOfInputs) {
+                if (AIOScanner.fAudioContext === null) return;
                 this.fMerger	= AIOScanner.fAudioContext.createChannelMerger (chans);
                 this.fMerger.connect (node);
             }

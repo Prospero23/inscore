@@ -3,9 +3,9 @@
 //----------------------------------------------------------------------------
 // INScore interface
 //----------------------------------------------------------------------------
-interface TMessage     {}
+export interface TMessage     {}
 
-interface INScore {
+export interface INScore {
 
     initialise():Promise<any> ;
 
@@ -164,5 +164,3 @@ interface INScore {
 	timeTask ()	    : void;
 	sorterTask()	: void;
 }
-
-declare var inscore : INScore;

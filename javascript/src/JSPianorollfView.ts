@@ -1,8 +1,8 @@
+import { JSPianoRollView } from "./JSPianorollView";
+import { TFileLoader } from "./TFileLoader";
+import type { INScoreObject } from "./lib/libINScore";
 
-///<reference path="JSPianorollView.ts"/>
-///<reference path="TFileLoader.ts"/>
-
-class JSPianoRollfView extends JSPianoRollView {
+export class JSPianoRollfView extends JSPianoRollView {
 
 	toString() : string		    { return "JSPianoRollfView"; }
 

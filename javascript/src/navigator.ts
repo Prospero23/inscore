@@ -1,17 +1,17 @@
 
 
-var Safari: boolean = false;
-var Explorer: boolean = false;
-var Edge: boolean = false;
+export var Safari: boolean = false;
+export var Explorer: boolean = false;
+export var Edge: boolean = false;
 var Firefox: boolean = false;
 var Chrome: boolean = false;
 
-var WindowsOS: boolean = false;
+export var WindowsOS: boolean = false;
 var MacOS: boolean = false;
-var UnixOS: boolean = false;
-var AndroidOS: boolean = false;
+export var UnixOS: boolean = false;
+export var AndroidOS: boolean = false;
 
-function scanNavigator() : void {
+export function scanNavigator() : void {
 	var ua = window.navigator.userAgent;
 	Chrome = (ua.indexOf('Chrome') >= 0);
 	Safari = (ua.indexOf('Safari') >= 0) && ! Chrome;
@@ -20,7 +20,7 @@ function scanNavigator() : void {
 	Firefox = (ua.indexOf('Firefox') >= 0);
 }
 
-function scanPlatform() : void {
+export function scanPlatform() : void {
 	var os = window.navigator.appVersion;
 	WindowsOS = (os.indexOf('Win') >= 0);
 	MacOS = (os.indexOf('Mac') >= 0) && ! Chrome;

@@ -1,11 +1,13 @@
+import { GuidoEngine } from "./guidoengine";
+import { INScoreObject } from "./lib/libINScore";
+import { JSGMNView } from "./JSGMNView";
+import type { JSObjectView } from "./JSObjectView";
 
-///<reference path="JSGMNView.ts"/>
+export class JSGMNStreamView extends JSGMNView {
 
-class JSGMNStreamView extends JSGMNView {
+	private fStream: GuidoStream | null = null;
 
-	private fStream: GuidoStream = null;
-
-	constructor(parent: JSObjectView, guido: GuidoEngine) {
+	constructor(parent: JSObjectView, guido: GuidoEngine | null) {
 		super(parent, guido);
 		if (guido)
 			this.fStream = guido.openStream();
@@ -13,20 +15,26 @@ class JSGMNStreamView extends JSGMNView {
 
 	clone (parent: JSObjectView) : JSObjectView { return new JSGMNStreamView(parent, this.guido()); }
 	delete() : void	{ 
-		this.guido().closeStream (this.fStream);
+		let guido = this.guido();
+		if (guido && this.fStream) guido.closeStream(this.fStream);
 		this.fStream = null;
 		super.delete();
 	}
 
 	toString() : string		    { return "JSGMNStreamView"; }
-	string2Ar (obj: INScoreObject, gmn: string) : ARHandler { return this.guido().stream2AR (this.fParser, this.fStream); }
+	string2Ar (obj: INScoreObject, gmn: string) : ARHandler | null {
+		let guido = this.guido();
+		if (!guido || !this.fParser || !this.fStream) return null;
+		return guido.stream2AR(this.fParser, this.fStream);
+	}
 
 	updateSpecial(obj: INScoreObject)	: boolean {
-		if (!this.fStream) return false;
+		let guido = this.guido();
+		if (!guido || !this.fStream) return false;
 
 		let gmn = obj.getGuidoStream();
-		if (gmn.reset) this.guido().resetStream(this.fStream);
-		if (gmn.stream.length) this.guido().writeStream (this.fStream, gmn.stream);
+		if (gmn.reset) guido.resetStream(this.fStream);
+		if (gmn.stream.length) guido.writeStream (this.fStream, gmn.stream);
 		return super.updateSpecial (obj);
     }
 

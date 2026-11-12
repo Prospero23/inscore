@@ -1,7 +1,8 @@
+import { JSSvgBase, type SVGShape } from "./JSSVGBase";
+import type { JSObjectView } from "./JSObjectView";
+import type { INScoreObject, OPen } from "./lib/libINScore";
 
-///<reference path="JSSVGBase.ts"/>
-
-class JSSVGView extends JSSvgBase {
+export class JSSVGView extends JSSvgBase {
 
 	constructor(parent: JSObjectView) {
 		super(parent);

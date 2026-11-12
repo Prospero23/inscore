@@ -1,18 +1,19 @@
+import { AudioObject, AudioRouting } from "./AudioObject";
+import { AIOScanner } from "./AIOScanner";
+import { INScoreObject } from "./lib/libINScore";
+import { JSObjectView } from "./JSObjectView";
+import { JSAutoSize } from "./JSAutoSize";
 
-///<reference path="lib/libINScore.d.ts"/>
-///<reference path="JSAutoSize.ts"/>
-///<reference path="AIOScanner.ts"/>
-///<reference path="AudioObject.ts"/>
-
-abstract class TMedia extends JSAutoSize implements AudioObject {
+export abstract class TMedia extends JSAutoSize implements AudioObject {
 	private fReady : boolean = false;
 	private fListen : boolean = false;
-	private fAudioNode : AudioNode = null;
-    protected fRouter : AudioRouting = null;
+	private fAudioNode : AudioNode | null = null;
+    protected fRouter : AudioRouting | null = null;
 
 	constructor(elt: HTMLMediaElement, parent: JSObjectView) {
         super(elt, parent);
 		AIOScanner.init();
+		if (!AIOScanner.fAudioContext) return;
 		this.fAudioNode = AIOScanner.fAudioContext.createMediaElementSource(elt);
 		this.fAudioNode.connect (AIOScanner.fAudioContext.destination);
 		this.fRouter  = new AudioRouting (this.fAudioNode, this.fAudioNode.channelCount, this.toString());
@@ -37,6 +38,7 @@ abstract class TMedia extends JSAutoSize implements AudioObject {
 			obj.ready();
 			elt.id = obj.getID();
 			// the connect message is intended to sync the model with the existing connection
+			if (inscore === null) return;
 			inscore.postMessageStrStr (obj.getOSCAddress(), "connect", AIOScanner.kOutputName);
 			inscore.postMessageStrStr (obj.getOSCAddress(), "event", "ready");
 			// obj.event ("ready");
@@ -53,7 +55,7 @@ abstract class TMedia extends JSAutoSize implements AudioObject {
 	getNumInputs() : number     { return 0; } 
     getNumOutputs() : number    { return this.fAudioNode ? this.fAudioNode.numberOfOutputs : 0; }
     getNumChans() : number      { return this.fAudioNode ? this.fAudioNode.channelCount : 0; }
-    getAudioNode() : AudioNode  { return this.fAudioNode; }
-    getSplitter() : AudioNode   { return this.fRouter.getSplitter(); }
-    getMerger() : AudioNode     { return this.fRouter.getMerger(); }
+    getAudioNode() : AudioNode | null { return this.fAudioNode; }
+    getSplitter() : AudioNode | null  { return this.fRouter?.getSplitter() ?? null; }
+    getMerger() : AudioNode | null    { return this.fRouter?.getMerger() ?? null; }
 }

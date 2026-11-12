@@ -59,7 +59,7 @@ endif()
 
 #######################################
 # set sub modules path
-set (CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} modules)
+set (CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/modules")
 
 #######################################
 # set directories for src and headers.
@@ -122,14 +122,14 @@ endforeach()
 
 #######################################
 # guidoar settings
-find_package(GUIDOAR REQUIRED)
+find_package(GUIDOAR REQUIRED NO_CMAKE_FIND_ROOT_PATH)
 set (SRC ${CORESRC} ${GUIDOAR_SRC})
 set (HEADERS ${COREHEADERS} ${GUIDOAR_HEADERS})
 set (INCDIRS ${INCDIRS} ${GUIDOAR_INCLUDE_DIRS})
 
 #######################################
 # guido settings
-find_package(GUIDO REQUIRED)
+find_package(GUIDO REQUIRED NO_CMAKE_FIND_ROOT_PATH)
 set (INCDIRS ${INCDIRS} ${GUIDO_INCLUDE_DIRS})
 set (LIBS ${LIBS} ${GUIDO_LIBRARIES})
 
@@ -282,7 +282,7 @@ endif(QTVIEW)
 #######################################
 # WASM settings
 if (WASM)
-	find_package(WASM REQUIRED)
+	find_package(WASM REQUIRED NO_CMAKE_FIND_ROOT_PATH)
 	set (SRC ${SRC} ${WASM_SRC})
 	set (HEADERS ${HEADERS} ${WASM_HEADERS})
 	set (INCDIRS ${INCDIRS} ${WASM_INCLUDE_DIRS})

@@ -1,7 +1,8 @@
+import { JSAutoSize } from "./JSAutoSize";
+import type { JSObjectView } from "./JSObjectView";
+import type { INScoreObject, OEvents, OPosition, OShadow, OTextInfo } from "./lib/libINScore";
 
-///<reference path="JSAutoSize.ts"/>
-
-class JSHtmlView extends JSAutoSize {
+export class JSHtmlView extends JSAutoSize {
 
     constructor(parent: JSObjectView) {
 		super( document.createElement('div'), parent); 
